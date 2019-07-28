@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/faboptions_camera_first"
+        android:icon="@drawable/outline_camera_enhance_white_24"
+        android:title="Share photos" />
+    <item
+        android:id="@+id/faboptions_private_group"
+        android:icon="@drawable/ic_account_multiple_outline_white_24dp"
+        android:title="Private group" />
+
+    <item
+        android:id="@+id/faboptions_new_group"
+        android:icon="@drawable/ic_account_multiple_plus_outline_white_24dp"
+        android:title="Group" />
+
+    <item
+        android:id="@+id/faboptions_app_settings"
+        android:icon="@drawable/outline_tune_white_24"
+        android:title="App settings" />
+
+    <item
+        android:id="@+id/faboptions_groups_nearby"
+        android:icon="@drawable/ic_map_marker_outline_white_24dp"
+        android:title="Groups nearby" />
+
+
+    <item
+        android:id="@+id/faboptions_intro_contact"
+        android:icon="@drawable/outline_local_florist_white_24"
+        android:title="Intro contact" />
+
+</menu>

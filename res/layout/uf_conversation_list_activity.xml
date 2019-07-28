@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                           xmlns:app="http://schemas.android.com/apk/res-auto"
+                                           xmlns:tools="http://schemas.android.com/tools"
+                                           android:layout_width="match_parent"
+                                           android:layout_height="match_parent">
+
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fitsSystemWindows="true">
+
+        <!--<include android:id="@+id/toolbar" layout="@layout/uf_toolbar" />-->
+
+        <androidx.appcompat.widget.Toolbar
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/toolbar"
+            android:layout_alignParentTop="true"
+            android:elevation="4dp"
+            app:contentInsetStart="14dp"
+            app:contentInsetLeft="14dp"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:minHeight="?attr/actionBarSize"
+            app:theme="@style/TextSecure.LightActionBar"
+            app:layout_collapseMode="pin"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="?attr/ToolbarOverflowMenuStyle"
+            android:background="?attr/conversation_list_toolbar_background"
+            >
+            <!--android:background="?attr/colorPrimary" see above-->
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                            xmlns:app="http://schemas.android.com/apk/res-auto"
+                            android:id="@+id/toolbar_unfacd_name_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:visibility="gone"
+                            android:paddingRight="0dp">
+
+                <com.unfacd.android.ui.components.TintableImage
+                    android:id="@+id/toolbar_unfacd_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Toolbar unfacd"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    app:imagetint="@color/toolbar_unfacd_name_icon"
+                    app:srcCompat="@drawable/ic_unfacd_name_white"/>
+
+
+                <TextView
+                    android:id="@+id/toolbar_nickname"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/toolbar_unfacd_name"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="@color/white"
+                    android:text="..."
+                    android:textSize="11dp"/>
+
+                <ImageView android:id="@+id/search_action"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:src="@drawable/ic_search_white_24dp"
+                           android:paddingRight="10dp"
+                           android:paddingEnd="10dp"
+                           android:layout_alignParentRight="true"
+                           android:layout_alignParentEnd="true"
+                           android:layout_centerVertical="true"/>
+            </RelativeLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:layout_below="@+id/toolbar"
+                      android:orientation="vertical">
+            //
+            <include layout="@layout/uf_basenotification" />
+          //
+
+             <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                             xmlns:tools="http://schemas.android.com/tools"
+                             android:layout_width="match_parent"
+                             android:layout_height="match_parent">
+
+                <com.ogaclejapan.smarttablayout.SmartTabLayout
+                    android:id="@+id/sliding_tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    app:stl_indicatorAlwaysInCenter="false"
+                    app:stl_indicatorWithoutPadding="false"
+                    app:stl_indicatorInFront="false"
+                    app:stl_indicatorInterpolation="smart"
+                    app:stl_indicatorGravity="bottom"
+                    app:stl_indicatorColor="?attr/colorPrimaryDark"
+                    app:stl_indicatorThickness="4dp"
+                    app:stl_indicatorWidth="auto"
+                    app:stl_indicatorCornerRadius="2dp"
+                    app:stl_overlineColor="#4D000000"
+                    app:stl_overlineThickness="0dp"
+                    app:stl_underlineColor="@color/gray12"
+                    app:stl_underlineThickness="0dp"
+                    app:stl_dividerColor="@color/white"
+                    app:stl_dividerThickness="0dp"
+                    app:stl_defaultTabBackground="@color/white"
+                    app:stl_defaultTabTextAllCaps="true"
+                    app:stl_defaultTabTextColor="#FC000000"
+                    app:stl_defaultTabTextSize="12sp"
+                    app:stl_defaultTabTextHorizontalPadding="16dp"
+                    app:stl_defaultTabTextMinWidth="0dp"
+                    app:stl_distributeEvenly="true"
+                    app:stl_clickable="true"
+                    app:stl_titleOffset="24dp"
+                    app:stl_drawDecorationAfterTab="true"
+                    />
+
+
+                <androidx.viewpager.widget.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+                                                     xmlns:tools="http://schemas.android.com/tools"
+                                                     android:id="@+id/pager"
+                                                     android:layout_width="match_parent"
+                                                     android:layout_height="match_parent"
+                                                     android:layout_below="@+id/sliding_tabs"
+                                                     android:textSize="20dp"
+                                                     android:textStyle="bold"
+                                                     tools:context=".ActivityUser" />
+
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_alignParentBottom="true" />
+
+             </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:animateLayoutChanges="true"
+            android:background="#BB000000"
+            android:backgroundTint="@color/white"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <org.thoughtcrime.securesms.components.SearchToolbar
+        android:id="@+id/search_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:elevation="4dp"
+        android:visibility="invisible"
+        tools:visibility="visible"/>
+
+</androidx.drawerlayout.widget.DrawerLayout>

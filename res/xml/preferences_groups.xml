@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:key="message_trimming" android:title="@string/preferences_groups__category_title_Geo_groups">
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_geogroups_roaming"
+            android:summary="@string/preferences__groups_summary_enable_geo_groups"
+            android:title="@string/preferences__groups_title_enable_geo_groups" />
+
+        <CheckBoxPreference android:defaultValue="true"
+                            android:key="pref_geogroups_wanderer_mode"
+                            android:title="@string/preferences__groups_title_geo_groups_wanderer_mode"
+                            android:summary="@string/preferences__groups_summary_geo_groups_wanderer_mode"
+                            android:dependency="pref_geogroups_roaming"/>
+
+        <CheckBoxPreference android:defaultValue="false"
+                            android:key="pref_geogroups_conquerer_mode"
+                            android:title="@string/preferences__groups_title_geo_groups_conqueror_mode"
+                            android:summary="@string/preferences__groups_summary_geo_groups_conqueror_mode"
+                            android:dependency="pref_geogroups_roaming"/>
+
+        <CheckBoxPreference android:defaultValue="false"
+                            android:key="pref_geogroups_journaler_mode"
+                            android:title="@string/preferences__groups_title_geo_groups_journaler_mode"
+                            android:summary="@string/preferences__groups_summary_geo_groups_journaler_mode"
+                            android:dependency="pref_geogroups_roaming"/>
+
+        <ListPreference android:key="pref_geogroups_locality_level"
+                        android:title="@string/preferences__groups_title_geoloc_roaming_trigger"
+                        android:entries="@array/pref_geogroups_locality_levels_entries"
+                        android:entryValues="@array/pref_geogroups_locality_levels_values"
+                        android:defaultValue="@array/pref_geogroups_locality_levels_default"
+                        android:dependency="pref_geogroups_roaming">
+        </ListPreference>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:layout="@layout/preference_divider"/>
+
+    <PreferenceCategory android:key="media_download" android:title="@string/preferences_groups__category_title_User_groups">
+        <ListPreference android:key="pref_usergroups_baseloc_level"
+                        android:title="@string/preferences__groups_title_baseloc_zones"
+                        android:entries="@array/pref_groups_baseloc_levels_entries"
+                        android:entryValues="@array/pref_groups_baseloc_levels_values"
+                        android:defaultValue="@array/pref_groups_baseloc_levels_default">
+        </ListPreference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

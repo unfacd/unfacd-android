@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:key="about" android:title="@string/recipient_preferences__about">
+        <org.thoughtcrime.securesms.preferences.widgets.ContactPreference android:key="pref_key_number" android:persistent="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="about_divider" android:layout="@layout/preference_divider"/>
+
+    <PreferenceCategory android:key="notification_settings" android:title="@string/recipient_preferences__chat_settings">
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_recipient_mute"
+            android:title="@string/recipient_preferences__mute_conversation"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_recipient_custom_notifications"
+            android:title="@string/recipient_preferences__custom_notifications"
+            android:defaultValue="false"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.preferences.widgets.SignalPreference
+            android:dependency="pref_key_recipient_mute"
+            android:key="pref_key_recipient_ringtone"
+            android:title="@string/recipient_preferences__notification_sound"
+            android:persistent="false"/>
+
+        <org.thoughtcrime.securesms.preferences.widgets.SignalListPreference
+            android:dependency="pref_key_recipient_mute"
+            android:key="pref_key_recipient_vibrate"
+            android:title="@string/recipient_preferences__vibrate"
+            android:entries="@array/recipient_vibrate_entries"
+            android:entryValues="@array/recipient_vibrate_values"
+            android:defaultValue="0"
+            android:persistent="false"/>
+
+        <org.thoughtcrime.securesms.preferences.widgets.ColorPickerPreference
+            android:key="pref_key_recipient_color"
+            android:title="@string/recipient_preferences__color"
+            android:defaultValue="@android:color/black"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:persistent="false"
+            app:numColumns="5" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:layout="@layout/preference_divider"/>
+
+    <PreferenceCategory android:key="call_settings" android:title="@string/recipient_preferences__call_settings">
+
+        <org.thoughtcrime.securesms.preferences.widgets.SignalPreference
+            android:key="pref_key_recipient_call_ringtone"
+            android:title="@string/recipient_preferences__ringtone"
+            android:persistent="false"/>
+
+        <org.thoughtcrime.securesms.preferences.widgets.SignalListPreference
+            android:key="pref_key_recipient_call_vibrate"
+            android:title="@string/recipient_preferences__vibrate"
+            android:entries="@array/recipient_vibrate_entries"
+            android:entryValues="@array/recipient_vibrate_values"
+            android:defaultValue="0"
+            android:persistent="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="divider" android:layout="@layout/preference_divider"/>
+
+    <PreferenceCategory android:key="privacy_settings" android:title="@string/recipient_preferences__privacy">
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_recipient_block"
+            android:title="@string/preferences_groups__share_profile_key"
+            android:summary="@string/preferences_groups__share_profile_key_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_recipient_blocked_by"
+            android:title="@string/preferences_blocked_by"
+            android:summary="@string/preferences_groups__share_profile_key_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <!-- -->
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_share_profile_key"
+            android:title="@string/preferences_groups__share_profile_key"
+            android:summary="@string/preferences_groups__share_profile_key_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_shared_profile_key"
+            android:title="@string/preferences_groups__share_profile_key"
+            android:summary="@string/preferences_groups__share_profile_key_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_share_presence"
+            android:title="@string/preferences_share_presence"
+            android:summary="@string/preferences_share_presence_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_ignore_presence"
+            android:title="@string/preferences_share_presence"
+            android:summary="@string/preferences_share_presence_summary"
+            android:defaultValue="true"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_sharing_activity_state"
+            android:title="@string/preferences_sharing_contact"
+            android:summary="@string/preferences_sharing_activity_state_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_ignore_shared_activity_state"
+            android:title="@string/preferences_shared_contact"
+            android:summary="@string/preferences_shared_activity_state_summary"
+            android:defaultValue="true"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_share_read_receipt"
+            android:title="@string/preferences_share_read_receipt"
+            android:summary="@string/preferences_share_read_receipt_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_ignore_read_receipt"
+            android:title="@string/preferences_share_read_receipt"
+            android:summary="@string/preferences_share_read_receipt_summary"
+            android:defaultValue="true"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_sharing_contact"
+            android:title="@string/preferences_sharing_contact"
+            android:summary="@string/preferences_sharing_contact_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+        <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+            android:key="pref_key_shared_contact"
+            android:title="@string/preferences_shared_contact"
+            android:summary="@string/preferences_shared_contact_summary"
+            android:defaultValue="true"
+            android:disableDependentsState="true"
+            android:persistent="false" />
+
+        <Preference android:key="pref_key_recipient_identity"
+                    android:title="@string/recipient_preferences__view_safety_number"
+                    android:persistent="false"
+                    android:enabled="false"/>
+
+    </PreferenceCategory>
+
+    <!-- -->
+    <PreferenceCategory android:key="group_permissions" android:title="@string/recipient_preferences__group_permissions">
+    <com.unfacd.android.preferences.CustomMultiSelectListPreference
+        xmlns:customPreference="http://schemas.android.com/apk/res-auto"
+        android:key="pref_key_permissions_group_presentation"
+        android:title="Group Presentation Permissions"
+        android:dialogTitle="Select permitted members"
+        android:summary="Members who are allowed to change group's title, and other display attributes."
+        android:entries="@array/empty_array"
+        android:entryValues="@array/empty_array"
+        customPreference:dynamicEntriesProvider="com.unfacd.android.preferences.MultiSelectPreferenceListGroupMembers"
+        customPreference:dynamicEntryValuesProvider="com.unfacd.android.preferences.MultiSelectPreferenceListGroupMembersSelected"
+        customPreference:selectAllValuesByDefault="true"
+        />
+    <com.unfacd.android.preferences.CustomMultiSelectListPreference
+        xmlns:customPreference="http://schemas.android.com/apk/res-auto"
+        android:key="pref_key_permissions_group_membership"
+        android:title="Group Membership Permissions"
+        android:dialogTitle="Select permitted members"
+        android:summary="Members who are allowed to invite, ban, and remove other members"
+        android:entries="@array/empty_array"
+        android:entryValues="@array/empty_array"
+        customPreference:dynamicEntriesProvider="com.unfacd.android.preferences.MultiSelectPreferenceListGroupMembers"
+        customPreference:dynamicEntryValuesProvider="com.unfacd.android.preferences.MultiSelectPreferenceListGroupMembersSelected"
+        customPreference:selectAllValuesByDefault="true"
+        />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="misc_settings" android:title="@string/recipient_preferences__misc_settings">
+    <ListPreference android:key="pref_key_geogroup_sticky"
+                    android:title="@string/recipient_preferences__geogroup_sticky"
+                    android:entries="@array/recipient_geogroup_sticky_entries"
+                    android:entryValues="@array/recipient_geogroup_sticky_values"
+                    android:defaultValue="0"
+                    android:persistent="false"/>
+
+    <org.thoughtcrime.securesms.components.SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="pref_toggle_reload_group"
+        android:title="@string/recipient_preferences__reload_group"
+        />
+    </PreferenceCategory>
+    <!-- -->
+</PreferenceScreen>

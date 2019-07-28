@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:alpha="1"
+    app:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout android:id="@+id/group_details_layout"
+                  android:layout_width="fill_parent"
+                  android:layout_height="140dp"
+                  android:paddingLeft="14dp"
+                  android:paddingRight="18dp"
+                  android:paddingTop="14dp"
+                  android:orientation="horizontal"
+                  android:gravity="center_vertical">
+
+            <org.thoughtcrime.securesms.components.ImageDivet android:id="@+id/avatar"
+                                                              android:layout_width="70dp"
+                                                              android:layout_height="70dp"
+                                                              position="bottom_right"
+                                                              android:layout_marginRight="10dp"
+                                                              android:contentDescription="@string/GroupCreateActivity_avatar_content_description" />
+
+            <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nicknameLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="5dp">
+
+                <org.thoughtcrime.securesms.components.emoji.EmojiEditText
+                    android:id="@+id/nickname"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:lines="1"
+                    android:layout_weight="1"
+                    android:maxLength="20"
+                    android:drawableEnd="?attr/general_accept_icon"
+                    android:inputType="textAutoCorrect"
+                    android:hint="@string/RegistrationActivity_optional_nickname"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!--<ImageView
+                    android:id="@+id/next_button"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_width="24dp"
+                    android:gravity="center"
+                    android:layout_height="24dp"
+                    android:textSize="24dp"
+                    android:src="@drawable/ic_arrow_forward_white_24dp"/>
+-->
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

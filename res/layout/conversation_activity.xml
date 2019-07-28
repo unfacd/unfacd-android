@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+<org.thoughtcrime.securesms.components.InputAwareLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                     xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                     android:id="@+id/htab_maincontent"
+                                                     android:layout_width="match_parent"
+                                                     android:layout_height="match_parent"
+                                                     android:fitsSystemWindows="true">
+
+    &lt;!&ndash;android:paddingTop="?attr/actionBarSize" removed becase it caused gapping under the new Toolbar&ndash;&gt;
+    <LinearLayout android:id="@+id/conversation_container"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+
+                  android:gravity="bottom"
+                  android:clipToPadding="false"
+                  android:clipChildren="false">
+
+
+
+        <include android:id="@+id/toolbar" layout="@layout/uf_toolbar" />
+
+        //
+        <include layout="@layout/uf_basenotification" />
+        //
+
+        //
+        <net.cachapa.expandablelayout.ExpandableLayout
+            android:id="@+id/expandable_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            app:el_duration="500"
+            app:el_expanded="false"
+            app:el_parallax="0.5">
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                          xmlns:tools="http://schemas.android.com/tools"
+                          android:id="@+id/expandable_indicators"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal"
+                          tools:background="?attr/colorPrimary">
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:id="@+id/expandable_indicator_edit"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_edit"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:id="@+id/expandable_indicator_settings"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_settings"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:id="@+id/expandable_indicator_owner"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              android:paddingStart="16dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_owner"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_privacy_mode"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_delivery_mode"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_join_mode"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View android:layout_width="match_parent"
+                  android:layout_height="4dp"
+                  android:background="@drawable/search_toolbar_shadow"/>
+        </net.cachapa.expandablelayout.ExpandableLayout>
+        //
+
+        <ViewStub
+            android:id="@+id/group_share_profile_view_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/group_share_profile_view"
+            android:layout="@layout/conversation_activity_group_share_profile_stub" />
+
+        <ViewStub
+            android:id="@+id/unverified_banner_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/unverified_banner"
+            android:layout="@layout/conversation_activity_unverified_banner_stub" />
+
+        <ViewStub
+            android:id="@+id/reminder_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/reminder"
+            android:layout="@layout/conversation_activity_reminderview_stub" />
+
+        <FrameLayout
+            android:id="@+id/fragment_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ViewStub
+            android:id="@+id/attachment_editor_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/attachment_editor"
+            android:layout="@layout/conversation_activity_attachment_editor_stub" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+        <include layout="@layout/conversation_input_panel" />
+
+            <include layout="@layout/conversation_search_nav" />
+
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:text="@string/conversation_activity__enable_signal_messages"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/unblock_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:text="@string/ConversationActivity_unblock"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/make_default_sms_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:text="@string/conversation_activity__enable_signal_for_sms"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/space_left"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:windowBackground"
+            android:paddingLeft="5dip"
+            android:text="160/160 (1)"
+            android:visibility="gone" />
+
+        <ViewStub
+            android:id="@+id/emoji_drawer_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/emoji_drawer"
+            android:layout="@layout/conversation_activity_emojidrawer_stub" />
+
+    </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
+
+
+</org.thoughtcrime.securesms.components.InputAwareLayout>-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:id="@+id/htab_maincontent"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+<!--<android.support.v7.widget.Toolbar
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="?attr/conversation_list_toolbar_background"
+    android:theme="?attr/actionBarStyle"
+    app:contentInsetStartWithNavigation="0dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:navigationIcon="?homeAsUpIndicator"
+    tools:background="#ff007f00">
+
+
+    <include layout="@layout/conversation_title_view" />
+
+</android.support.v7.widget.Toolbar>-->
+
+<org.thoughtcrime.securesms.components.InputAwareLayout
+    android:id="@+id/layout_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+    <!--android:paddingTop="?attr/actionBarSize" removed because it caused gapping under the new Toolbar-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        >
+
+        <include android:id="@+id/toolbar" layout="@layout/uf_toolbar" />
+
+        //
+        <include layout="@layout/uf_basenotification" />
+        //
+
+        //
+        <net.cachapa.expandablelayout.ExpandableLayout
+            android:id="@+id/expandable_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            app:el_duration="500"
+            app:el_expanded="false"
+            app:el_parallax="0.5">
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                          xmlns:tools="http://schemas.android.com/tools"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal"
+                          tools:background="?attr/colorPrimary">
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_edit"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_settings"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              android:paddingStart="16dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_owner"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_privacy_mode"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_delivery_mode"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              xmlns:tools="http://schemas.android.com/tools"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:gravity="center"
+                              android:orientation="vertical"
+                              android:padding="8dp"
+                              tools:background="?attr/colorPrimary">
+
+                    <ImageView
+                        android:id="@+id/indicator_join_mode"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_close_grey600_32dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View android:layout_width="match_parent"
+                  android:layout_height="4dp"
+                  android:background="@drawable/search_toolbar_shadow"/>
+        </net.cachapa.expandablelayout.ExpandableLayout>
+        //
+
+        <ViewStub
+            android:id="@+id/group_share_profile_view_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/group_share_profile_view"
+            android:layout="@layout/conversation_activity_group_share_profile_stub" />
+
+        <ViewStub
+            android:id="@+id/unverified_banner_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/unverified_banner"
+            android:layout="@layout/conversation_activity_unverified_banner_stub" />
+
+        <ViewStub
+            android:id="@+id/reminder_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/reminder"
+            android:layout="@layout/conversation_activity_reminderview_stub" />
+
+        <FrameLayout
+            android:id="@+id/fragment_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ViewStub
+            android:id="@+id/attachment_editor_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/attachment_editor"
+            android:layout="@layout/conversation_activity_attachment_editor_stub" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <include layout="@layout/conversation_input_panel" />
+
+            <include layout="@layout/conversation_search_nav" />
+
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:text="@string/conversation_activity__enable_signal_messages"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/unblock_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:text="@string/ConversationActivity_unblock"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/make_default_sms_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:text="@string/conversation_activity__enable_signal_for_sms"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/space_left"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:windowBackground"
+            android:paddingStart="5dip"
+            android:text="160/160 (1)"
+            android:visibility="gone" />
+
+
+        <ViewStub
+            android:id="@+id/emoji_drawer_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/emoji_drawer"
+            android:layout="@layout/conversation_activity_emojidrawer_stub" />
+
+    </LinearLayout>
+
+
+</org.thoughtcrime.securesms.components.InputAwareLayout>
+
+</FrameLayout>

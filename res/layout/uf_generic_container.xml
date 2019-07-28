@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generic template to enable Toolbar for activities that get replaced by Fragments with android.R.id.content -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical">
+    <include android:id="@+id/toolbar" layout="@layout/uf_toolbar" />
+
+    <include layout="@layout/uf_basenotification" />
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_below="@+id/uf_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    </LinearLayout>
+</FrameLayout>

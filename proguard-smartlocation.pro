@@ -1,0 +1,1 @@
+-dontwarn io.nlopez.smartlocation.rx.**
