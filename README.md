@@ -1,6 +1,6 @@
 # unfacd Android 
 
-This is the android client for the unfacd network. unfacd is a fusion messaging/social network. Download [unfacd](https://play.google.com/store/apps/details?id=com.unfacd.android)
+This is the android client for the unfacd network. unfacd is a fusion messaging/social network. Download [unfacd](https://play.google.com/store/apps/details?id=com.unfacd.android) to try it out. You'll need a valid email to register, as you'll be sent a verification link. Once you are verified, there won't be any future requirement to "sign on" again.
 
 ## Relationship with Signal App
 
