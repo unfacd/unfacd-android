@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+android {
+    namespace 'org.signal.devicetransfer'
+    buildToolsVersion BUILD_TOOL_VERSION
+    compileSdk COMPILE_SDK
+
+    defaultConfig {
+        minSdkVersion MINIMUM_SDK
+        targetSdkVersion TARGET_SDK
+    }
+
+    compileOptions {
+        sourceCompatibility JAVA_VERSION
+        targetCompatibility JAVA_VERSION
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation project(':core-util')
+    implementation "org.signal:libsignal-client:${LIBSIGNAL_CLIENT_VERSION}"
+//    implementation libs.libsignal.client
+    api 'org.greenrobot:eventbus:3.0.0'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation ('org.robolectric:robolectric:4.4') {
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+    }
+    testImplementation 'org.robolectric:shadows-multidex:4.4'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+}

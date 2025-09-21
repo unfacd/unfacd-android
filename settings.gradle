@@ -1,3 +1,45 @@
-//libsignal-metadata-java
-//include ':modules:libsignal-metadata-java'
-//project(':libsignal-metadata-java').projectDir = new File(settingsDir, '../libsignal-metadata-java')
+
+plugins {
+    id "com.gradle.enterprise" version "3.4.1"
+}
+
+include ':app'
+include ':lintchecks'
+include ':paging'
+include ':paging-app'
+include ':core-util'
+include ':glide-config'
+include ':video'
+include ':device-transfer'
+include ':device-transfer-app'
+include ':image-editor'
+include ':donations'
+include ':donations-app'
+include ':contacts'
+include ':contacts-app'
+
+//AA+
+include ':smart-location'
+include ':debug-db-base', ':debug-database-encrypt'
+
+project(':app').name = 'unfacd-android'
+project(':paging').projectDir = file('paging/lib')
+project(':paging-app').projectDir = file('paging/app')
+project(':image-editor').projectDir = file('image-editor/lib')
+
+project(':smart-location').projectDir = file('smart-location/lib')
+project(':debug-db-base').projectDir = file('debug-database/debug-db-base')
+project(':debug-database-encrypt').projectDir = file('debug-database/debug-db-encrypt')
+
+project(':device-transfer').projectDir = file('device-transfer/lib')
+project(':device-transfer-app').projectDir = file('device-transfer/app')
+
+project(':donations').projectDir = file('donations/lib')
+project(':donations-app').projectDir = file('donations/app')
+
+project(':contacts').projectDir = file('contacts/lib')
+project(':contacts-app').projectDir = file('contacts/app')
+
+
+rootProject.name = 'unfacd'
+apply from: 'dependencies.gradle'

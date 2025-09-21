@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:fitsSystemWindows="true"
+              android:orientation="vertical">
+
+    <!-- added property android:fitsSystemWindows="true"
+     https://medium.com/google-developers/why-would-i-want-to-fitssystemwindows-4e26d9ce1eec#.9yyqqv2tj
+    -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:visibility="visible"
+        app:navigationIcon="@drawable/ic_arrow_left_24"
+        app:title="@string/GroupCreateActivity_actionbar_title" />
+
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout android:id="@+id/group_details_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            android:paddingLeft="14dp"
+            android:paddingRight="18dp"
+            android:paddingTop="14dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <org.thoughtcrime.securesms.components.ImageDivet android:id="@+id/avatar"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                position="bottom_right"
+                android:layout_marginRight="10dp"
+                android:contentDescription="@string/GroupCreateActivity_avatar_content_description" />
+
+            <!-- AA+ added floating lable-->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/groupEditLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                >
+
+                <org.thoughtcrime.securesms.components.emoji.EmojiEditText
+                    android:id="@+id/group_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:padding="10dp"
+                    android:lines="1"
+                    android:maxLength="255"
+                    android:inputType="textAutoCorrect"
+                    android:hint="@string/GroupCreateActivity_group_name_hint" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/creating_group_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="106dp"
+            android:paddingLeft="18dp"
+            android:paddingRight="18dp"
+            android:paddingTop="18dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                style="@android:style/Widget.ProgressBar"
+                android:indeterminate="true" />
+
+            <org.thoughtcrime.securesms.components.emoji.EmojiTextView
+                android:id="@+id/creating_group_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:padding="10dp"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+
+        <RelativeLayout android:id="@+id/push_disabled"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="106dp"
+            android:padding="15dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:background="#aa000000"
+            android:visibility="gone">
+
+            <TextView android:id="@+id/push_disabled_reason"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:padding="8dp"
+                android:background="#dd222222"
+                android:textColor="#ffeeeeee"
+                android:fontFamily="sans-serif-light"
+                android:textSize="16sp"
+                android:text="@string/GroupCreateActivity_contacts_dont_support_push" />
+
+            </RelativeLayout>
+
+    </RelativeLayout>
+
+    <!--advanced layout-->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/switch_button_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_centerVertical="true"
+                android:text="See more advanced settings..."/>
+
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/switch_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="4dp"
+                android:layout_marginEnd="4dp"
+                android:padding="16dp"
+                app:kswBackRadius="2dp"
+                app:kswThumbRadius="2dp"
+                app:kswThumbHeight="12dp"
+                app:kswTintColor="?attr/colorPrimaryDark"/>
+        </RelativeLayout>
+
+        <com.unfacd.android.ui.components.expandablelayout.ExpandableLayout
+            android:id="@+id/expandable_layout_advanced"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:el_duration="500"
+            app:el_parallax="0.7"
+            app:el_expanded="false">
+
+            <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                >
+
+                <com.roughike.swipeselector.SwipeSelector
+                    xmlns:app="http://schemas.android.com/apk/lib/com.roughike.swipeselector"
+                    android:id="@+id/delivery_mode_selector"
+                    android:layout_marginTop="85dp"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:theme="?attr/DefaultSwipeSelector"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_gravity="center"
+                    android:background="#EEDDDD" />
+                <com.roughike.swipeselector.SwipeSelector
+                    xmlns:app="http://schemas.android.com/apk/lib/com.roughike.swipeselector"
+                    android:id="@+id/join_mode_selector"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:theme="?attr/DefaultSwipeSelector"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_gravity="center"
+                    android:background="#EEDDDD" />
+                <com.roughike.swipeselector.SwipeSelector
+                    xmlns:app="http://schemas.android.com/apk/lib/com.roughike.swipeselector"
+                    android:id="@+id/privacy_mode_selector"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:theme="?attr/DefaultSwipeSelector"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_gravity="center"
+                    android:background="#EEDDDD" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_centerVertical="true"
+                        android:text="Max members allowed"/>
+
+                    <com.shawnlin.numberpicker.NumberPicker
+                        android:id="@+id/number_picker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginEnd="16dp"
+                        app:np_width="50dp"
+                        app:np_height="120dp"
+                        app.np_selectedTextSize="10dp"
+                        app:np_textSize="12sp"
+                        app:np_dividerColor="#EEDDDD"
+                        app:np_max="200"
+                        app:np_min="0"
+                        app:np_selectedTextColor="?attr/colorPrimaryDark"
+                        app:np_value="0" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            </ScrollView>
+        </com.unfacd.android.ui.components.expandablelayout.ExpandableLayout>
+
+    </LinearLayout>
+
+    <!--permission layout-->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/switch_button_permissions_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_centerVertical="true"
+                android:text="Group permissions related settings..."/>
+
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/switch_button_permission"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="4dp"
+                android:layout_marginEnd="4dp"
+                android:padding="16dp"
+                app:kswBackRadius="2dp"
+                app:kswThumbRadius="2dp"
+                app:kswThumbHeight="12dp"
+                app:kswTintColor="?attr/colorPrimaryDark"/>
+        </RelativeLayout>
+
+        <com.unfacd.android.ui.components.expandablelayout.ExpandableLayout
+            android:id="@+id/expandable_layout_permissions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:el_duration="500"
+            app:el_parallax="0.7"
+            app:el_expanded="false">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center">
+
+                    <com.roughike.swipeselector.SwipeSelector
+                        xmlns:app="http://schemas.android.com/apk/lib/com.roughike.swipeselector"
+                        android:id="@+id/semantics_mode_selector"
+                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:theme="?attr/DefaultSwipeSelector"/>
+
+                </LinearLayout>
+            </ScrollView>
+        </com.unfacd.android.ui.components.expandablelayout.ExpandableLayout>
+
+    </LinearLayout>
+
+    <org.thoughtcrime.securesms.components.PushRecipientsPanel android:id="@+id/recipients"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp" />
+
+    <ListView android:id="@+id/selected_contacts_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

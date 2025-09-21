@@ -1,0 +1,7 @@
+.java/
+/protobuf/java/org/whispersystems/signalservice/internal/websocket/WebSocketProtos.java
+/java/org/whispersystems/signalservice/internal/sticker/StickerProtos.java
+/java/org/thoughtcrime/securesms/devicelist/DeviceNameProtos.java
+/java/org/whispersystems/signalservice/internal/push/SignalServiceProtos.java
+/java/org/thoughtcrime/securesms/backup/BackupProtos.java
+/java/org/signal/libsignal/metadata/SignalProtos.java

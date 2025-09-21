@@ -1,0 +1,37 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.amitshekhar.debug.encrypt'
+    compileSdk 33
+    defaultConfig {
+        minSdkVersion MINIMUM_SDK
+        targetSdkVersion TARGET_SDK
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+repositories {
+    maven {
+        url "https://raw.github.com/signalapp/maven/master/sqlcipher/release/"
+        content {
+            includeGroupByRegex "org\\.signal.*"
+        }
+    }
+}
+dependencies {
+    api project(':debug-db-base')
+    implementation libs.signal.android.database.sqlcipher
+    implementation libs.androidx.sqlite
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+//apply from: 'debug-db-encrypt-upload.gradle'

@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.library'
+    id("com.google.protobuf")
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    namespace 'org.signal.core.util'
+    buildToolsVersion BUILD_TOOL_VERSION
+    compileSdk COMPILE_SDK
+
+    defaultConfig {
+        minSdkVersion MINIMUM_SDK
+        targetSdkVersion TARGET_SDK
+        multiDexEnabled true
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JAVA_VERSION
+        targetCompatibility JAVA_VERSION
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.21.7'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation libs.androidx.core.ktx
+    implementation libs.google.protobuf.javalite
+    implementation libs.androidx.sqlite
+
+    coreLibraryDesugaring libs.android.tools.desugar
+
+    testImplementation testLibs.junit.junit
+    testImplementation testLibs.mockito.core
+    testImplementation (testLibs.robolectric.robolectric) {
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+    }
+}

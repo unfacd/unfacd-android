@@ -1,0 +1,97 @@
+package com.unfacd.android.locallyaddressable;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import org.thoughtcrime.securesms.recipients.RecipientId;
+import org.thoughtcrime.securesms.util.GroupUtil;
+import org.whispersystems.util.ByteArrayUtil;
+
+import java.io.IOException;
+
+import androidx.annotation.NonNull;
+
+public class LocallyAddressableFence extends LocallyAddressableGroup {
+  public static final Parcelable.Creator<LocallyAddressableFence> CREATOR = new Parcelable.Creator<LocallyAddressableFence>() {
+    public LocallyAddressableFence createFromParcel(Parcel in) {
+      return new LocallyAddressableFence(in);
+    }
+
+    public LocallyAddressableFence[] newArray(int size) {
+      return new LocallyAddressableFence[size];
+    }
+  };
+
+  long fid;
+
+  public LocallyAddressableFence(RecipientId recipientId, byte[] groupIdRaw, long fid) {
+    super(recipientId, groupIdRaw);
+    this.fid = fid;
+    this.addressableType = AddressableType.FENCE;
+  }
+
+  public LocallyAddressableFence(Parcel in) {
+//    this.groupIdRaw = new byte[in.readInt()];
+//    in.readByteArray(this.groupIdRaw);
+    super(RecipientId.from(in.readLong()), new byte[in.readInt()]);//todo: load group
+    this.fid = in.readLong();
+  }
+
+  public static LocallyAddressable from(RecipientId recipientId, long fid) {
+    if (fid > 0) {
+      return new LocallyAddressableFence(recipientId, new byte[32], fid);
+    } else {
+      return LocallyAddressableUndefined.require();
+    }
+  }
+
+  @Override
+  public int describeContents() {
+    return AddressableType.FENCE.getValue();
+  }
+
+  @Override
+  public boolean isEmail () {
+    return false;
+  }
+
+  @Override
+  public boolean isGroup () {
+    if (groupIdRaw.length > 0) return true;
+
+    return false;
+  }
+
+  @Override
+  public boolean isFence () {
+    return true;
+  }
+
+  @Override
+  public boolean isPhone () {
+    return false;
+  }
+
+  @Override
+  public boolean isUfsrvUid () {
+    return false;
+  }
+
+  @Override
+  public @NonNull String toString() {
+    return groupIdEncoded;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeLong(recipientId.toLong());
+    dest.writeByteArray(groupIdRaw);
+    dest.writeLong(fid);
+  }
+
+  @Override
+  public int compareTo (LocallyAddressable locallyAddressable) {
+    LocallyAddressableGroup locallyAddressableGroup = (LocallyAddressableGroup)locallyAddressable;
+    return this.groupIdEncoded.compareTo(locallyAddressableGroup.groupIdEncoded);
+  }
+}

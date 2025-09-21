@@ -1,0 +1,169 @@
+dependencyResolutionManagement {
+  versionCatalogs {
+    libs {
+      version('libsignal-client', '0.15.0')
+      version('exoplayer', '2.19.1')
+      version('androidx-camera', '1.0.0-beta11')
+      version('androidx-lifecycle', '2.3.1')
+      version('mp4parser', '1.9.39')
+      version('glide', '4.13.2')
+      version("kotlin", "1.9.21")
+      version("android-gradle-plugin", "8.4.0") //AGP
+
+      // Desugaring
+        library("android-tools-desugar", "com.android.tools:desugar_jdk_libs:1.1.6")
+
+      // Kotlin
+      library('kotlin-stdlib-jdk8', 'org.jetbrains.kotlin', 'kotlin-stdlib-jdk8').versionRef('kotlin')
+      library('kotlin-reflect', 'org.jetbrains.kotlin', 'kotlin-reflect').versionRef('kotlin')
+
+      // Android X
+     library('androidx-core-ktx', 'androidx.core:core-ktx:1.9.0')
+     library('androidx-fragment-ktx', 'androidx.fragment:fragment-ktx:1.3.5')
+     library('androidx-annotation','androidx.annotation:annotation:1.2.0')
+     library('androidx-appcompat', 'androidx.appcompat:appcompat:1.2.0')
+     library('androidx-constraintlayout','androidx.constraintlayout:constraintlayout:2.0.4')
+     library('androidx-window','androidx.window:window:1.0.0-alpha09')
+     library('androidx-recyclerview','androidx.recyclerview:recyclerview:1.1.0')
+     library('androidx-legacy-support','androidx.legacy:legacy-support-v13:1.0.0')
+     library('androidx-legacy-preference','androidx.legacy:legacy-preference-v14:1.0.0')
+     library('androidx-cardview','androidx.cardview:cardview:1.0.0')
+     library('androidx-preference','androidx.preference:preference:1.0.0')
+     library('androidx-gridlayout','androidx.gridlayout:gridlayout:1.0.0')
+     library('androidx-exifinterface','androidx.exifinterface:exifinterface:1.0.0')
+     library('androidx-multidex','androidx.multidex:multidex:2.0.1')
+     library('androidx-navigation-fragment-ktx','androidx.navigation:navigation-fragment-ktx:2.3.5')
+     library('androidx-navigation-ui-ktx','androidx.navigation:navigation-ui-ktx:2.3.5')
+     library('androidx-lifecycle-extensions','androidx.lifecycle:lifecycle-extensions:2.2.0')
+     library('androidx-lifecycle-viewmodel-savedstate','androidx.lifecycle', 'lifecycle-viewmodel-savedstate').versionRef('androidx-lifecycle')
+     library('androidx-lifecycle-common-java8','androidx.lifecycle', 'lifecycle-common-java8').versionRef('androidx-lifecycle')
+     library('androidx-lifecycle-reactivestreams-ktx','androidx.lifecycle', 'lifecycle-reactivestreams-ktx').versionRef('androidx-lifecycle')
+     library('androidx-camera-core','androidx.camera', 'camera-core').versionRef('androidx-camera')
+     library('androidx-camera-camera2','androidx.camera', 'camera-camera2').versionRef('androidx-camera')
+     library('androidx-camera-lifecycle','androidx.camera', 'camera-lifecycle').versionRef('androidx-camera')
+     library('androidx-camera-view','androidx.camera:camera-view:1.0.0-alpha18')
+     library('androidx-concurrent-futures','androidx.concurrent:concurrent-futures:1.0.0')
+     library('androidx-autofill','androidx.autofill:autofill:1.0.0')
+     library('androidx-biometric','androidx.biometric:biometric:1.1.0')
+     library('androidx-sharetarget','androidx.sharetarget:sharetarget:1.2.0')
+     library('androidx-sqlite','androidx.sqlite:sqlite:2.1.0')
+
+      // Material
+      library('material-material','com.google.android.material:material:1.5.0')
+
+      // Google
+      library('google-protobuf-javalite','com.google.protobuf:protobuf-javalite:3.11.4')
+      library('google-libphonenumber','com.googlecode.libphonenumber:libphonenumber:8.12.42')
+      library('google-play-services-maps','com.google.android.gms:play-services-maps:17.0.0')
+      library('google-play-services-auth','com.google.android.gms:play-services-auth:16.0.1')
+      library('google-play-services-wallet','com.google.android.gms:play-services-wallet:19.4.0')
+      library('google-zxing-android-integration','com.google.zxing:android-integration:3.3.0')
+      library('google-zxing-core','com.google.zxing:core:3.4.1')
+      library('google-ez-vcard','com.googlecode.ez-vcard:ez-vcard:0.9.11')
+      library('google-integrity-api','com.google.android.play:integrity:1.3.0')//AA+
+
+      // Exoplayer
+      library('exoplayer-core','com.google.android.exoplayer', 'exoplayer-core').versionRef('exoplayer')
+      library('exoplayer-ui','com.google.android.exoplayer', 'exoplayer-ui').versionRef('exoplayer')
+      library('exoplayer-extension-mediasession','com.google.android.exoplayer', 'extension-mediasession').versionRef('exoplayer')
+      bundle('exoplayer', ['exoplayer-core', 'exoplayer-ui', 'exoplayer-extension-mediasession'])
+
+      // Firebase
+      library('firebase-messaging','com.google.firebase:firebase-messaging:22.0.0')
+
+      // 1st Party
+    library('libsignal-client','org.signal', 'libsignal-client').versionRef('libsignal-client')
+    library('libsignal-android','org.signal', 'libsignal-android').versionRef('libsignal-client')
+//      library('libsignal-client').to('org.signal', 'libsignal-client').versionRef('libsignal-client')
+//      library('libsignal-android').to('org.signal', 'libsignal-android').versionRef('libsignal-client')
+      library('signal-aesgcmprovider','org.signal:aesgcmprovider:0.0.3')
+      library('signal-argon2','org.signal:argon2:13.1')
+      library('signal-ringrtc','org.signal:ringrtc-android:2.20.0')
+      library('signal-android-database-sqlcipher','org.signal:android-database-sqlcipher:4.5.1-S1')
+
+      // Third Party
+      library('greenrobot-eventbus','org.greenrobot:eventbus:3.0.0')
+      library('jackson-core','com.fasterxml.jackson.core:jackson-databind:2.9.9.2')
+      library('jackson-module-kotlin','com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0')
+      library('square-okhttp3','com.squareup.okhttp3:okhttp:3.12.13')
+      library('square-okio','com.squareup.okio:okio:2.2.2')
+      library('square-leakcanary','com.squareup.leakcanary:leakcanary-android:2.7')
+      library('threeten-threetenbp','org.threeten:threetenbp:1.3.6')
+      library('rxjava3-rxjava','io.reactivex.rxjava3:rxjava:3.0.13')
+      library('rxjava3-rxandroid','io.reactivex.rxjava3:rxandroid:3.0.0')
+      library('rxjava3-rxkotlin','io.reactivex.rxjava3:rxkotlin:3.0.1')
+      library('rxdogtag','com.uber.rxdogtag2:rxdogtag:2.0.1')
+      library('conscrypt-android','org.conscrypt:conscrypt-android:2.0.0')
+      library('mobilecoin','com.mobilecoin:android-sdk:1.1.0')
+      library('leolin-shortcutbadger','me.leolin:ShortcutBadger:1.1.22')
+      library('emilsjolander-stickylistheaders','se.emilsjolander:stickylistheaders:2.7.0')
+      library('jpardogo-materialtabstrip','com.jpardogo.materialtabstrip:library:1.0.9')
+      library('apache-httpclient-android','org.apache.httpcomponents:httpclient-android:4.3.5')
+      library('glide-glide','com.github.bumptech.glide:glide:4.15.1')
+      library('glide-compiler','com.github.bumptech.glide:compiler:4.15.1')
+      library('photoview','com.github.chrisbanes:PhotoView:2.3.0')
+      library('roundedimageview','com.makeramen:roundedimageview:2.1.0')
+      library('materialish-progress','com.pnikosis:materialish-progress:1.5')
+      library('waitingdots','pl.tajchert:waitingdots:0.1.0')
+      library('floatingactionbutton','com.melnykov:floatingactionbutton:1.3.0')
+      library('time-duration-picker','mobi.upod:time-duration-picker:1.1.3')
+      library('subsampling-scale-image-view','com.davemorrissey.labs:subsampling-scale-image-view:3.10.0')
+//      library('numberpickerview','cn.carbswang.android:NumberPickerView:1.0.9') //del (in-code migration)
+      library('android-tooltips','com.tomergoldst.android:tooltips:1.0.6')
+      library('android-smsmms','com.klinkerapps:android-smsmms:4.0.1')
+      library('stream','com.annimon:stream:1.1.8')
+      library('colorpicker','com.takisoft.colorpicker:colorpicker:1.0.1')
+      library('lottie','com.airbnb.android:lottie:3.6.0')
+      library('stickyheadergrid','com.codewaves.stickyheadergrid:stickyheadergrid:0.9.4')//upgrade to 0.9.7
+      library('circular-progress-button','com.github.dmytrodanylyk.circular-progress-button:library:1.1.3-S2')
+      library('dnsjava','dnsjava:dnsjava:2.1.9')
+      library('facebook-flipper','com.facebook.flipper:flipper:0.91.0')
+      library('facebook-soloader','com.facebook.soloader:soloader:0.10.1')
+
+      //AA+
+      library('facebook-stetho','com.facebook.stetho:stetho:1.5.1')
+      library('google-maps-utils','com.google.maps.android:android-maps-utils:3.7.0')
+      library('expandablelayout','net.cachapa.expandablelayout:expandablelayout:2.9.2')
+      library('kongzue-dialogx','com.github.kongzue.DialogX:DialogX:0.0.49')//https://github.com/kongzue/DialogX
+
+
+      // Mp4Parser
+      library('mp4parser-isoparser','org.mp4parser', 'isoparser').versionRef('mp4parser')
+      library('mp4parser-streaming','org.mp4parser', 'streaming').versionRef('mp4parser')
+      library('mp4parser-muxer','org.mp4parser', 'muxer').versionRef('mp4parser')
+      bundle('mp4parser', ['mp4parser-isoparser', 'mp4parser-streaming', 'mp4parser-muxer'])
+    }
+
+    testLibs {
+      version('robolectric', '4.4')
+      version('powermock', '2.0.9')
+
+      library('junit-junit','junit:junit:4.13.2')
+      library('androidx-test-core','androidx.test:core:1.2.0')
+      library('androidx-test-ext-junit','androidx.test.ext:junit:1.1.1')
+      library('espresso-core','androidx.test.espresso:espresso-core:3.2.0')
+      library('mockito-core','org.mockito:mockito-core:2.23.4')
+      library('mockito-core','org.mockito:mockito-inline:4.4.0')
+      library('mockito-kotlin','org.mockito.kotlin:mockito-kotlin:4.0.0')
+      library('robolectric-robolectric','org.robolectric', 'robolectric').versionRef('robolectric')
+      library('robolectric-shadows-multidex','org.robolectric', 'shadows-multidex').versionRef('robolectric')
+      library('bouncycastle-bcprov-jdk15on','org.bouncycastle:bcprov-jdk15on:1.70')
+      library('hamcrest-hamcrest','org.hamcrest:hamcrest:2.2')
+      library('assertj-core','org.assertj:assertj-core:3.11.1')
+      library('powermock-api-mockito','org.powermock', 'powermock-api-mockito2').versionRef('powermock')
+      library('powermock-module-junit4-core','org.powermock', 'powermock-module-junit4').versionRef('powermock')
+      library('powermock-module-junit4-rule','org.powermock', 'powermock-module-junit4-rule').versionRef('powermock')
+      library('powermock-classloading-xstream','org.powermock', 'powermock-classloading-xstream').versionRef('powermock')
+
+      library('conscrypt-openjdk-uber','org.conscrypt:conscrypt-openjdk-uber:2.0.0')
+    }
+
+    lintLibs {
+      version('lint', '26.6.3')
+
+      library('lint-api','com.android.tools.lint', 'lint-api').versionRef('lint')
+      library('lint-checks','com.android.tools.lint', 'lint-checks').versionRef('lint')
+      library('lint-tests','com.android.tools.lint', 'lint-tests').versionRef('lint')
+    }
+  }
+}

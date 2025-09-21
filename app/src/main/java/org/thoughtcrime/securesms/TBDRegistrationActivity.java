@@ -1,0 +1,1747 @@
+package org.thoughtcrime.securesms;
+
+import android.Manifest;
+import android.animation.Animator;
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.util.Pair;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.OvershootInterpolator;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.dd.CircularProgressButton;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.CredentialRequest;
+import com.google.android.gms.auth.api.credentials.CredentialRequestResult;
+import com.google.android.gms.auth.api.credentials.IdentityProviders;
+import com.google.android.gms.auth.api.phone.SmsRetriever;
+import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.i18n.phonenumbers.AsYouTypeFormatter;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+import com.unfacd.android.BuildConfig;
+import com.unfacd.android.R;
+import com.unfacd.android.data.json.JsonEntityVerifiedAccount;
+import com.unfacd.android.jobs.RegistrationStatusVerifierJob;
+import com.unfacd.android.ui.components.CheckingAccountVerificationStatusView;
+import com.unfacd.android.utils.IntentServiceCheckNicknameAvailability;
+import com.unfacd.android.utils.NicknameAvailabilityReceiver;
+
+import net.zetetic.database.sqlcipher.SQLiteDatabase;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.signal.core.util.logging.Log;
+import org.signal.libsignal.zkgroup.InvalidInputException;
+import org.signal.libsignal.zkgroup.profiles.ProfileKey;
+import org.thoughtcrime.securesms.animation.AnimationCompleteListener;
+import org.thoughtcrime.securesms.backup.FullBackupBase;
+import org.thoughtcrime.securesms.backup.FullBackupImporter;
+import org.thoughtcrime.securesms.components.LabeledEditText;
+import org.thoughtcrime.securesms.components.registration.VerificationCodeView;
+import org.thoughtcrime.securesms.components.registration.VerificationPinKeyboard;
+import org.thoughtcrime.securesms.crypto.AttachmentSecretProvider;
+import org.thoughtcrime.securesms.crypto.ProfileKeyUtil;
+import org.thoughtcrime.securesms.crypto.SenderKeyUtil;
+import org.thoughtcrime.securesms.crypto.storage.SignalServiceAccountDataStoreImpl;
+import org.thoughtcrime.securesms.database.IdentityDatabase;
+import org.thoughtcrime.securesms.database.NoExternalStorageException;
+import org.thoughtcrime.securesms.database.RecipientDatabase;
+import org.thoughtcrime.securesms.database.SignalDatabase;
+import org.thoughtcrime.securesms.dependencies.ApplicationDependencies;
+import org.thoughtcrime.securesms.gcm.FcmUtil;
+import org.thoughtcrime.securesms.jobs.DirectoryRefreshJob;
+import org.thoughtcrime.securesms.jobs.RotateCertificateJob;
+import org.thoughtcrime.securesms.keyvalue.SignalStore;
+import org.thoughtcrime.securesms.lock.RegistrationLockReminders;
+import org.thoughtcrime.securesms.logsubmit.SubmitDebugLogActivity;
+import org.thoughtcrime.securesms.notifications.NotificationChannels;
+import org.thoughtcrime.securesms.permissions.Permissions;
+import org.thoughtcrime.securesms.push.AccountManagerFactory;
+import org.thoughtcrime.securesms.recipients.Recipient;
+import org.thoughtcrime.securesms.recipients.RecipientId;
+import org.thoughtcrime.securesms.registration.CaptchaActivity;
+import org.thoughtcrime.securesms.registration.PushChallengeRequest;
+import org.thoughtcrime.securesms.registration.RegistrationRepository;
+import org.thoughtcrime.securesms.service.DirectoryRefreshListener;
+import org.thoughtcrime.securesms.service.RotateSignedPreKeyListener;
+import org.thoughtcrime.securesms.service.VerificationCodeParser;
+import org.thoughtcrime.securesms.util.BackupUtil;
+import org.thoughtcrime.securesms.util.Base64;
+import org.thoughtcrime.securesms.util.DateUtils;
+import org.thoughtcrime.securesms.util.Dialogs;
+import org.thoughtcrime.securesms.util.PlayServicesUtil;
+import org.thoughtcrime.securesms.util.PlayServicesUtil.PlayServicesStatus;
+import org.thoughtcrime.securesms.util.ProfileUtil;
+import org.thoughtcrime.securesms.util.ServiceUtil;
+import org.thoughtcrime.securesms.util.TextSecurePreferences;
+import org.thoughtcrime.securesms.util.Util;
+import org.thoughtcrime.securesms.util.concurrent.AssertedSuccessListener;
+import org.signal.libsignal.protocol.util.KeyHelper;
+import java.util.Optional;
+import org.whispersystems.signalservice.api.SignalServiceAccountManager;
+import org.whispersystems.signalservice.api.crypto.UnidentifiedAccess;
+import org.whispersystems.signalservice.api.push.ACI;
+import org.whispersystems.signalservice.api.push.PNI;
+import org.whispersystems.signalservice.api.push.ServiceIdType;
+import org.whispersystems.signalservice.api.push.SignalServiceAddress;
+import org.whispersystems.signalservice.api.push.exceptions.CaptchaRequiredException;
+import org.whispersystems.signalservice.api.push.exceptions.RateLimitException;
+import org.whispersystems.signalservice.api.util.PhoneNumberFormatter;
+import org.whispersystems.signalservice.api.util.UuidUtil;
+import org.whispersystems.signalservice.internal.push.LockedException;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+
+/**
+ * The register account activity.  Prompts ths user for their registration information
+ * and begins the account registration process.
+ *
+ * @author Moxie Marlinspike
+ *
+ */
+public class TBDRegistrationActivity extends BaseActivity implements VerificationCodeView.OnCodeEnteredListener,
+        CheckingAccountVerificationStatusView.Listener,//AA+
+        GoogleApiClient.ConnectionCallbacks,//AA+
+        GoogleApiClient.OnConnectionFailedListener//AA+
+{
+
+  private static final int    PICK_COUNTRY              = 1;
+  private static final int    CAPTCHA                   = 24601;
+  private static final int    SCENE_TRANSITION_DURATION = 250;
+  private static final int    DEBUG_TAP_TARGET          = 8;
+  private static final int    DEBUG_TAP_ANNOUNCE        = 4;
+  private static final long   PUSH_REQUEST_TIMEOUT_MS   = 5000L;
+
+  public static final String RE_REGISTRATION_EXTRA = "re_registration";
+  private static final int RC_PHONE_HINT = 22;
+
+
+  private static final String TAG = Log.tag(TBDRegistrationActivity.class);
+
+  private AsYouTypeFormatter     countryFormatter;
+  private ArrayAdapter<String>   countrySpinnerAdapter;
+  private Spinner                countrySpinner;
+  private LabeledEditText        countryCode;
+  private LabeledEditText        number;
+  private CircularProgressButton createButton;
+  private TextView               termsLinkView;
+  private TextView               title;
+  private TextView               subtitle;
+  private View                   registrationContainer;
+  private View                   verificationContainer;
+
+  private View                   restoreContainer;
+  private TextView               restoreBackupTime;
+  private TextView               restoreBackupSize;
+  private TextView               restoreBackupProgress;
+  private CircularProgressButton restoreButton;
+
+  private View                   pinContainer;
+  private EditText               pin;
+  private CircularProgressButton pinButton;
+  private TextView               pinForgotButton;
+  private View                   pinClarificationContainer;
+
+  //private CallMeCountDownView         callMeCountDownView; //AA-
+  private View                        wrongNumberButton;
+  private VerificationPinKeyboard     keyboard;
+  private VerificationCodeView        verificationCodeView;
+  private RegistrationState           registrationState;
+  private SmsRetrieverReceiver        smsRetrieverReceiver;
+  private SignalServiceAccountManager accountManager;
+  private int                         debugTapCounter;
+
+  //AA+
+  //intent service code for checking nicknames
+  public static final String            UFSRV_E164NUMBER_COUNTRYCODE = "+800";
+  public static final String            unspecifiedE164Number = UFSRV_E164NUMBER_COUNTRYCODE+"0000000000";
+
+  private String                        e164number;
+  private String                        countryCodeByUser;
+  private static final int              CHECK_NICKNAME = 10;
+  private TextInputLayout               nicknameLayout;
+  private EditText                      nickname;
+  private LabeledEditText               email;
+  private boolean                       isNicknameAvailable=true;
+  private NicknameAvailabilityReceiver  nicknameAvailabilityReceiver;//replaces CallMeCountDownView
+
+  CheckingAccountVerificationStatusView callMeCountDownView;
+
+  Handler                               handler = new Handler(Looper.getMainLooper());
+  Runnable                              runnableRegoVerificationJob = null;
+
+  private                               GoogleApiClient mGoogleApiClient;
+  private boolean                       mIsResolving;
+  private boolean                       mIsRequesting;
+  private static final int              RC_SAVE = 1;
+  private static final int              RC_READ = 3;
+  private static final String           IS_RESOLVING = "is_resolving";
+  private static final String           IS_REQUESTING = "is_requesting";
+
+  //better manage the firing of edit change events
+  private Timer timer = new Timer();
+  private final long DELAY = 1000; // in ms
+  //
+
+  @Override
+  public void onCreate(Bundle icicle) {
+    super.onCreate(icicle);
+
+    setContentView(R.layout.tbd_egistration_activity);
+
+    initializeResources();
+    initializeSpinner();
+    initializeNumber();
+    initializeBackupDetection();
+    initializeChallengeListener();
+
+    if (icicle != null) {
+      mIsResolving = icicle.getBoolean(IS_RESOLVING);
+      mIsRequesting = icicle.getBoolean(IS_REQUESTING);
+    }
+    setupNicknameAvailabilityServiceReceiver();//AA+
+    requestCredentialsHint ();
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    shutdownChallengeListener();
+    markAsVerifying(false);
+    EventBus.getDefault().unregister(this);
+
+    cancelRegoVerificationCheck();//AA+
+
+  }
+
+  @Override
+  @SuppressLint("MissingSuperCall") // no fragments to dispatch to
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == PICK_COUNTRY && resultCode == RESULT_OK && data != null) {
+      this.countryCode.setText(String.valueOf(data.getIntExtra("country_code", 1)));
+      setCountryDisplay(data.getStringExtra("country_name"));
+      setCountryFormatter(data.getIntExtra("country_code", 1));
+    } else if (requestCode == CAPTCHA && resultCode == RESULT_OK && data != null) {
+      registrationState = new RegistrationState(Optional.ofNullable(data.getStringExtra(CaptchaActivity.KEY_TOKEN)), registrationState);
+
+      if (data.getBooleanExtra(CaptchaActivity.KEY_IS_SMS, true)) {
+        handleRegister();
+      } else {
+        handlePhoneCallRequest();
+      }
+    } else if (requestCode == CAPTCHA) {
+      Toast.makeText(this, R.string.RegistrationActivity_failed_to_verify_the_captcha, Toast.LENGTH_LONG).show();
+      createButton.setIndeterminateProgressMode(false);
+      createButton.setProgress(0);
+    } else if (requestCode == RC_PHONE_HINT) {
+      if (data != null) {
+        Credential cred = data.getParcelableExtra(Credential.EXTRA_KEY);
+        if (cred != null) {
+          final String unformattedPhone = cred.getId();
+        }
+      }
+    } else if (requestCode == RC_READ) {
+      if (resultCode == RESULT_OK) {
+        Credential credential = data.getParcelableExtra(Credential.EXTRA_KEY);
+        processRetrievedCredential(credential);
+      } else {
+        Log.e(TAG, "Credential Read: NOT OK");
+//        setSignInEnabled(true);
+      }
+      mIsResolving = false;
+    } else if (requestCode == RC_SAVE) {
+      Log.d(TAG, "Result code: " + resultCode);
+      if (resultCode == RESULT_OK) {
+        Log.d(TAG, "Credential Save: OK");
+      } else {
+        Log.e(TAG, "Credential Save Failed");
+      }
+//      goToContent();
+      mIsResolving = false;
+    }
+
+  }
+
+  private void initializeResources() {
+    TextView skipButton        = findViewById(R.id.skip_button);
+    TextView restoreSkipButton = findViewById(R.id.skip_restore_button);
+
+    this.countrySpinner        = findViewById(R.id.country_spinner);
+    this.countryCode           = findViewById(R.id.country_code);
+    this.number                = findViewById(R.id.number);
+    this.createButton          = findViewById(R.id.registerButton);
+    this.title                 = findViewById(R.id.verify_header);
+    this.subtitle              = findViewById(R.id.verify_subheader);
+    this.registrationContainer = findViewById(R.id.registration_container);
+    this.verificationContainer = findViewById(R.id.verification_container);
+
+    this.verificationCodeView = findViewById(R.id.code);
+    this.keyboard             = findViewById(R.id.keyboard);
+    this.callMeCountDownView  = findViewById(R.id.call_me_count_down);
+    this.wrongNumberButton    = findViewById(R.id.wrong_number);
+
+    this.restoreContainer      = findViewById(R.id.restore_container);
+    this.restoreBackupSize     = findViewById(R.id.backup_size_text);
+    this.restoreBackupTime     = findViewById(R.id.backup_created_text);
+    this.restoreBackupProgress = findViewById(R.id.backup_progress_text);
+    this.restoreButton         = findViewById(R.id.restore_button);
+
+    this.pinContainer              = findViewById(R.id.pin_container);
+    this.pin                       = findViewById(R.id.pin);
+    this.pinButton                 = findViewById(R.id.pinButton);
+    this.pinForgotButton           = findViewById(R.id.forgot_button);
+    this.pinClarificationContainer = findViewById(R.id.pin_clarification_container);
+
+    this.registrationState    = new RegistrationState(RegistrationState.State.INITIAL, null, null, Optional.empty(), Optional.empty(), null, null, null, -1, null);
+    this.countryCode.getInput().addTextChangedListener(new CountryCodeChangedListener());
+    this.number.getInput().addTextChangedListener(new NumberChangedListener());
+    this.createButton.setOnClickListener(v -> handleRegister());
+    this.callMeCountDownView.setOnClickListener(v -> handlePhoneCallRequest());
+
+    skipButton.setOnClickListener(v -> handleCancel());
+    restoreSkipButton.setOnClickListener(v -> displayInitialView(true));
+
+    if (getIntent().getBooleanExtra(RE_REGISTRATION_EXTRA, false)) {
+      skipButton.setVisibility(View.VISIBLE);
+    } else {
+      skipButton.setVisibility(View.INVISIBLE);
+    }
+
+    this.keyboard.setOnKeyPressListener(key -> {
+      if (key >= 0) verificationCodeView.append(key);
+      else          verificationCodeView.delete();
+    });
+
+    this.verificationCodeView.setOnCompleteListener(this);
+    EventBus.getDefault().register(this);
+
+    //AA+
+    this.callMeCountDownView.setCountDownStateListener(this);
+    this.email                = findViewById(R.id.email);
+    this.email.requestFocus();
+
+    //AA+ support for floating edit
+//    this.nickname=findViewById(R.id.nickname);
+//    this.nicknameLayout=findViewById(R.id.nicknameLayout);
+//    this.nicknameLayout.setErrorEnabled(true);
+//
+//    this.nickname.addTextChangedListener(new TextWatcher() {
+//
+//      public void afterTextChanged(Editable s) {
+//        if (nickname.getText().length()==0)
+//        {
+//          nicknameLayout.setError("");
+//          isNicknameAvailable=true;
+//          return;
+//        }
+//
+//        timer = new Timer();
+//        timer.schedule(new TimerTask() {
+//          @Override
+//          public void run() {
+//            PendingIntent pendingResult = createPendingResult(CHECK_NICKNAME, new Intent(), 0);
+//            Intent intent = new Intent(getApplicationContext(), IntentServiceCheckNicknameAvailability.class);
+//            intent.putExtra(IntentServiceCheckNicknameAvailability.NICKNAME_EXTRA, nickname.getText().toString());
+//            intent.putExtra(IntentServiceCheckNicknameAvailability.PENDING_RESULT_EXTRA, nicknameAvailabilityReceiver/*pendingResult*/);//result carrier object
+//            startService(intent);
+//          }
+//        }, DELAY);
+//      }
+//
+//      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//      }
+//
+//      public void onTextChanged(CharSequence s, int start, int before, int count) {
+//        if(timer != null) timer.cancel();
+//      }
+//    });
+    //
+  }
+
+  private void onDebugClick(View view) {
+    debugTapCounter++;
+    if (debugTapCounter >= DEBUG_TAP_TARGET) {
+      startActivity(new Intent(this, SubmitDebugLogActivity.class));
+    } else if (debugTapCounter >= DEBUG_TAP_ANNOUNCE) {
+      int remaining = DEBUG_TAP_TARGET - debugTapCounter;
+      Toast.makeText(this, getResources().getQuantityString(R.plurals.RegistrationActivity_debug_log_hint, remaining, remaining), Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  @SuppressLint("ClickableViewAccessibility")
+  private void initializeSpinner() {
+    this.countrySpinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+    this.countrySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+    setCountryDisplay(getString(R.string.RegistrationActivity_select_your_country));
+
+    this.countrySpinner.setAdapter(this.countrySpinnerAdapter);
+    this.countrySpinner.setOnTouchListener((v, event) -> {
+      if (event.getAction() == MotionEvent.ACTION_UP) {
+        Intent intent = new Intent(TBDRegistrationActivity.this, CountrySelectionActivity.class);
+        startActivityForResult(intent, PICK_COUNTRY);
+      }
+      return true;
+    });
+    this.countrySpinner.setOnKeyListener((v, keyCode, event) -> {
+      if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER && event.getAction() == KeyEvent.ACTION_UP) {
+        Intent intent = new Intent(TBDRegistrationActivity.this, CountrySelectionActivity.class);
+        startActivityForResult(intent, PICK_COUNTRY);
+        return true;
+      }
+      return false;
+    });
+  }
+
+  @SuppressLint("MissingPermission")
+  private void initializeNumber() {
+    Optional<Phonenumber.PhoneNumber> localNumber = Optional.empty();
+
+    if (Permissions.hasAll(this, Manifest.permission.READ_PHONE_STATE)) {
+      localNumber = Util.getDeviceNumber(this);
+    }
+
+    if (localNumber.isPresent()) {
+      this.countryCode.setText(String.valueOf(localNumber.get().getCountryCode()));
+      this.number.setText(String.valueOf(localNumber.get().getNationalNumber()));
+    } else {
+      Optional<String> simCountryIso = Util.getSimCountryIso(this);
+
+      if (simCountryIso.isPresent() && !TextUtils.isEmpty(simCountryIso.get())) {
+        this.countryCode.setText(String.valueOf(PhoneNumberUtil.getInstance().getCountryCodeForRegion(simCountryIso.get())));
+
+        requestPhoneNumberHint();//AA+ doesnt work
+      }
+    }
+  }
+
+  private void requestPhoneNumberHint () {//AA+
+    /*GoogleApiClient apiClient = new GoogleApiClient.Builder(this)
+            .addApi(Auth.CREDENTIALS_API)
+            .build();
+
+    CredentialPickerConfig conf  = new CredentialPickerConfig.Builder()
+            .setShowAddAccountButton(true)
+            .build();
+
+    HintRequest hintRequest = new HintRequest.Builder()
+            .setPhoneNumberIdentifierSupported(true)
+            .setHintPickerConfig(conf)
+            .build();
+
+    PendingIntent intent = Auth.CredentialsApi.getHintPickerIntent(
+            apiClient, hintRequest);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(),
+                                 RC_PHONE_HINT, null, 0, 0, 0);
+
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
+    }*/
+  }
+
+  //START credentials https://www.androidauthority.com/how-to-integrate-smart-lock-in-android-apps-702638/
+  @Override
+  public void onSaveInstanceState(Bundle savedInstanceState) {
+    savedInstanceState.putBoolean(IS_RESOLVING, mIsResolving);
+    savedInstanceState.putBoolean(IS_REQUESTING, mIsRequesting);
+
+    super.onSaveInstanceState(savedInstanceState);
+  }
+
+  private void requestCredentialsHint ()
+  {
+    mGoogleApiClient = new GoogleApiClient.Builder(this)
+            .addConnectionCallbacks(this)
+            .enableAutoManage(this, 0, this)
+            .addApi(Auth.CREDENTIALS_API)
+            .build();
+  }
+
+  private void requestCredentials() {
+    mIsRequesting = true;
+
+    CredentialRequest request = new CredentialRequest.Builder()
+            .setPasswordLoginSupported(true)
+            .setAccountTypes(BuildConfig.UFSRVAPI_URL)//IdentityProviders.GOOGLE)
+            .build();
+
+    Auth.CredentialsApi.request(mGoogleApiClient, request).setResultCallback(new ResultCallback<CredentialRequestResult>() {
+              @Override
+              public void onResult(CredentialRequestResult credentialRequestResult) {
+                Status status = credentialRequestResult.getStatus();
+                if (credentialRequestResult.getStatus().isSuccess()) {
+                  // Successfully read the credential without any user interaction, this
+                  // means there was only a single credential and the user has auto
+                  // sign-in enabled.
+                  Credential credential = credentialRequestResult.getCredential();
+                  processRetrievedCredential(credential);
+                } else if (status.getStatusCode() == CommonStatusCodes.RESOLUTION_REQUIRED) {
+//                            setFragment(null);
+                  // This is most likely the case where the user has multiple saved
+                  // credentials and needs to pick one.
+                  resolveResult(status, RC_READ);
+                } else if (status.getStatusCode() == CommonStatusCodes.SIGN_IN_REQUIRED) {
+//                            setFragment(null);
+                  // This is most likely the case where the user does not currently
+                  // have any saved credentials and thus needs to provide a username
+                  // and password to sign in.
+                  Log.d(TAG, "Sign in required");
+//                  mSignInButton.setEnabled(true);
+                } else {
+                  Log.w(TAG, "Unrecognized status code: " + status.getStatusCode());
+//                            setFragment(null);
+//                  mSignInButton.setEnabled(true);
+                }
+              }
+            }
+    );
+  }
+
+  private void processRetrievedCredential(Credential credential) {
+    String accountType = credential.getAccountType();
+    if(accountType == null) {
+
+      if (true/*Util.isValidCredential(credential)*/) {
+        Log.d(TAG, "processRetrievedCredential: OWN ACCOUNT RETURNED...");
+//        goToContent();
+      } else {
+        // This is likely due to the credential being changed outside of
+        // Smart Lock,
+        // ie: away from Android or Chrome. The credential should be deleted
+        // and the user allowed to enter a valid credential.
+        Log.d(TAG, "Retrieved credential invalid, so delete retrieved" +
+                " credential.");
+        Toast.makeText(this, "Retrieved credentials are invalid, so will be deleted.", Toast.LENGTH_LONG).show();
+        deleteCredential(credential);
+        requestCredentials();
+//        mSignInButton.setEnabled(false);
+      }
+    }
+    else if (accountType.equals(IdentityProviders.GOOGLE)) {
+      // The user has previously signed in with Google Sign-In. Silently
+      // sign in the user with the same ID.
+      // See https://developers.google.com/identity/sign-in/android/
+      GoogleSignInOptions gso =
+              new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                      .requestEmail()
+                      .build();
+      mGoogleApiClient = new GoogleApiClient.Builder(this)
+              .enableAutoManage(this, this)
+              .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+              .setAccountName(credential.getId())
+              .build();
+      OptionalPendingResult<GoogleSignInResult> opr =
+              Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+      // ...
+    }
+  }
+
+  private void resolveResult(Status status, int requestCode) {
+    // We don't want to fire multiple resolutions at once since that can result
+    // in stacked dialogs after rotation or another similar event.
+    if (mIsResolving) {
+      Log.w(TAG, "resolveResult: already resolving.");
+      return;
+    }
+
+    Log.d(TAG, "Resolving: " + status);
+    if (status.hasResolution()) {
+      Log.d(TAG, "STATUS: RESOLVING");
+      try {
+        status.startResolutionForResult(this, requestCode);
+        mIsResolving = true;
+      } catch (IntentSender.SendIntentException e) {
+        Log.e(TAG, "STATUS: Failed to send resolution.", e);
+      }
+    } else {
+//      goToContent();
+    }
+  }
+
+  protected void saveCredential(Credential credential) {
+    // Credential is valid so save it.
+    Auth.CredentialsApi.save(mGoogleApiClient,
+                             credential).setResultCallback(new ResultCallback<Status>() {
+      @Override
+      public void onResult(Status status) {
+        if (status.isSuccess()) {
+          Log.d(TAG, "Credential saved");
+//          goToContent();
+        } else {
+          Log.d(TAG, "Attempt to save credential failed " +
+                  status.getStatusMessage() + " " +
+                  status.getStatusCode());
+          resolveResult(status, RC_SAVE);
+        }
+      }
+    });
+  }
+
+  private void deleteCredential(Credential credential) {
+    Auth.CredentialsApi.delete(mGoogleApiClient,
+                               credential).setResultCallback(new ResultCallback<Status>() {
+      @Override
+      public void onResult(Status status) {
+        if (status.isSuccess()) {
+          Log.d(TAG, "Credential successfully deleted.");
+        } else {
+          // This may be due to the credential not existing, possibly
+          // already deleted via another device/app.
+          Log.d(TAG, "Credential not deleted successfully.");
+        }
+      }
+    });
+  }
+
+  @Override
+  public void onConnected(Bundle bundle) {
+    Log.d(TAG, "onConnected");
+    requestCredentials();
+  }
+  @Override
+  public void onConnectionSuspended(int cause) {
+    Log.d(TAG, "onConnectionSuspended: " + cause);
+  }
+  @Override
+  public void onConnectionFailed(ConnectionResult connectionResult) {
+    Log.d(TAG, "onConnectionFailed: " + connectionResult);
+  }
+// END credentials
+
+  @SuppressLint("StaticFieldLeak")
+  private void initializeBackupDetection() {
+    if (!Permissions.hasAll(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+      Log.i(TAG, "Skipping backup detection. We don't have the permission.");
+      return;
+    }
+
+    if (getIntent().getBooleanExtra(RE_REGISTRATION_EXTRA, false)) return;
+
+    new AsyncTask<Void, Void, BackupUtil.BackupInfo>() {
+      @Override
+      protected @Nullable BackupUtil.BackupInfo doInBackground(Void... voids) {
+        try {
+          return BackupUtil.getLatestBackup();
+        } catch (NoExternalStorageException e) {
+          Log.w(TAG, e);
+          return null;
+        }
+      }
+
+      @Override
+      protected void onPostExecute(@Nullable BackupUtil.BackupInfo backup) {
+        if (backup != null) displayRestoreView(backup);
+      }
+    }.execute();
+  }
+
+  private void setCountryDisplay(String value) {
+    this.countrySpinnerAdapter.clear();
+    this.countrySpinnerAdapter.add(value);
+  }
+
+  private void setCountryFormatter(int countryCode) {
+    PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+    String regionCode    = util.getRegionCodeForCountryCode(countryCode);
+
+    if (regionCode == null) this.countryFormatter = null;
+    else                    this.countryFormatter = util.getAsYouTypeFormatter(regionCode);
+  }
+
+  private String getConfiguredE164Number() {
+    return PhoneNumberFormatter.formatE164(countryCode.getText().toString(),
+                                           number.getText().toString());
+  }
+
+  @SuppressLint("StaticFieldLeak")
+  private void handleRestore(BackupUtil.BackupInfo backup) {
+    View     view   = LayoutInflater.from(this).inflate(R.layout.enter_backup_passphrase_dialog, null);
+    EditText prompt = view.findViewById(R.id.restore_passphrase_input);
+
+    new AlertDialog.Builder(this)
+            .setTitle(R.string.RegistrationActivity_enter_backup_passphrase)
+            .setView(view)
+            .setPositiveButton(getString(R.string.RegistrationActivity_restore), (dialog, which) -> {
+              InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+              inputMethodManager.hideSoftInputFromWindow(prompt.getWindowToken(), 0);
+
+              restoreButton.setIndeterminateProgressMode(true);
+              restoreButton.setProgress(50);
+
+              final String passphrase = prompt.getText().toString();
+
+              new AsyncTask<Void, Void, BackupImportResult>() {
+                @Override
+                protected BackupImportResult doInBackground(Void... voids) {
+                  try {
+                    Context        context    = TBDRegistrationActivity.this;
+                    SQLiteDatabase database   = SignalDatabase.getBackupDatabase();
+
+                    FullBackupImporter.importFile(context,
+                                                  AttachmentSecretProvider.getInstance(context).getOrCreateAttachmentSecret(),
+                                                  database, backup.getUri(), passphrase);
+
+                    SignalDatabase.upgradeRestored(database);
+                    NotificationChannels.restoreContactNotificationChannels(context);
+
+                    SignalStore.settings().setBackupEnabled(true);
+                    TextSecurePreferences.setBackupPassphrase(context, passphrase);
+                    return BackupImportResult.SUCCESS;
+                  } catch (FullBackupImporter.DatabaseDowngradeException e) {
+                    Log.w(TAG, "Failed due to the backup being from a newer version of unfacd.", e);
+                    return BackupImportResult.FAILURE_VERSION_DOWNGRADE;
+                  } catch (IOException e) {
+                    Log.w(TAG, e);
+                    return BackupImportResult.FAILURE_UNKNOWN;
+                  }
+                }
+
+                @Override
+                protected void onPostExecute(@NonNull BackupImportResult result) {
+                  restoreButton.setIndeterminateProgressMode(false);
+                  restoreButton.setProgress(0);
+                  restoreBackupProgress.setText("");
+
+                  switch (result) {
+                    case SUCCESS:
+                      displayInitialView(true);
+                      break;
+                    case FAILURE_VERSION_DOWNGRADE:
+                      Toast.makeText(TBDRegistrationActivity.this, R.string.RegistrationActivity_backup_failure_downgrade, Toast.LENGTH_LONG).show();
+                      break;
+                    case FAILURE_UNKNOWN:
+                      Toast.makeText(TBDRegistrationActivity.this, R.string.RegistrationActivity_incorrect_backup_passphrase, Toast.LENGTH_LONG).show();
+                      break;
+                  }
+                }
+              }.execute();
+
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
+  }
+
+  //AA+
+  private void handleRegister() {
+
+    e164number = null;
+
+    if (!isValidEmail(email.getText())) {
+      Toast.makeText(this, getString(R.string.RegistrationActivity_you_must_specify_your_email_address), Toast.LENGTH_LONG).show();
+      return;
+    }
+
+    if (!TextUtils.isEmpty(number.getText())) {
+      if (TextUtils.isEmpty(countryCode.getText())) {
+        Toast.makeText(this, getString(R.string.RegistrationActivity_you_must_specify_your_country_code), Toast.LENGTH_LONG).show();
+        return;
+      }
+
+      e164number = getConfiguredE164Number();
+
+      if (!PhoneNumberFormatter.isValidNumber(e164number, countryCode.getText().toString())) {
+        Dialogs.showAlertDialog(this,
+                                getString(R.string.RegistrationActivity_invalid_number),
+                                String.format(getString(R.string.RegistrationActivity_the_number_you_specified_s_is_invalid), e164number));
+        return;
+//        e164number = unspecifiedE164Number; //we dont return since it is optional
+      }
+    }
+
+    //AA+
+    if (TextUtils.isEmpty(e164number)) {
+      e164number  = unspecifiedE164Number;
+      if (!TextUtils.isEmpty(countryCode.getText())) {
+        handleCountryCodeConfirmation(countryCode.getText().toString());
+        return;
+      }
+    }
+    handlePlayServicesCheck();
+    //
+  }
+
+  //AA+
+  private void handlePlayServicesCheck () {
+    PlayServicesStatus gcmStatus = PlayServicesUtil.getPlayServicesStatus(this);
+
+    if (gcmStatus == PlayServicesStatus.SUCCESS) {
+      handleRequestVerification(e164number, true, email.getText().toString());//AA+
+    } else if (gcmStatus == PlayServicesStatus.MISSING) {
+      handlePromptForNoPlayServices(null);
+    } else if (gcmStatus == PlayServicesStatus.NEEDS_UPDATE) {
+      GoogleApiAvailability.getInstance().getErrorDialog(this, ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED, 0).show();
+    } else {
+      Dialogs.showAlertDialog(this, getString(R.string.RegistrationActivity_play_services_error),
+                              getString(R.string.RegistrationActivity_google_play_services_is_updating_or_unavailable));
+    }
+  }
+
+  private final  boolean isValidEmail(CharSequence target) {
+    return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+  }
+
+  private void handleRequestVerification(@NonNull String e164number, boolean gcmSupported, @NonNull String email) {
+    createButton.setIndeterminateProgressMode(true);
+    createButton.setProgress(50);
+
+    if (false && gcmSupported && !TextUtils.isEmpty(e164number)) { //AA+ 2nd conditional
+      SmsRetrieverClient client = SmsRetriever.getClient(this);
+      Task<Void>         task   = client.startSmsRetriever();
+
+      task.addOnSuccessListener(none -> {
+        Log.i(TAG, "Successfully registered SMS listener.");
+        requestVerificationCode(e164number, true, true, email);
+      });
+
+      task.addOnFailureListener(e -> {
+        Log.w(TAG, "Failed to register SMS listener.", e);
+        requestVerificationCode(e164number, true, false, email);
+      });
+    } else {
+      requestVerificationCode(e164number, gcmSupported, false, email);
+    }
+  }
+
+  @SuppressLint("StaticFieldLeak")
+  private void requestVerificationCode(@NonNull String e164number, boolean gcmSupported, boolean smsRetrieverSupported, @NonNull String email) {
+    createButton.setIndeterminateProgressMode(true);
+    createButton.setProgress(50);
+
+    new AsyncTask<Void, Void, RegistrationState> () {//AA+ RegistrationState
+      @Override
+        protected @Nullable RegistrationState doInBackground(Void... voids) { //AA+
+        try {
+          markAsVerifying(true);
+
+          String password = Util.getSecret(18);
+
+          //AA+ set it too early for now because we may  before registration is complete
+          SignalStore.account().setServicePassword(password);
+
+          Optional<String> fcmToken;
+
+          if (gcmSupported) {
+            fcmToken = FcmUtil.getToken();
+          } else {
+            fcmToken = Optional.empty();
+          }
+
+          accountManager = AccountManagerFactory.createUnauthenticated(TBDRegistrationActivity.this, email, SignalServiceAddress.DEFAULT_DEVICE_ID, password);
+
+          Optional<String> pushChallenge = PushChallengeRequest.getPushChallengeBlocking(accountManager, fcmToken, e164number, PUSH_REQUEST_TIMEOUT_MS, email);
+
+          String cookiePending = null; accountManager.requestSmsVerificationCode(smsRetrieverSupported,  registrationState.captchaToken, pushChallenge, fcmToken, e164number, email);//AA+ return value disabled mid migration to new registration codebase
+          if (TextUtils.isEmpty(cookiePending)) throw new IOException();//AA+
+
+          TextSecurePreferences.setUfsrvPendingCookie(TBDRegistrationActivity.this, cookiePending);
+          return new RegistrationState(RegistrationState.State.INITIAL, e164number, password, fcmToken, Optional.empty(), cookiePending, null, email, -1, null);//AA+
+
+        } catch (IOException e) {
+          Log.w(TAG, "Error during account registration", e);
+          RegistrationState registrationState = new RegistrationState(RegistrationState.State.EXCEPTION, null, null, Optional.empty(), Optional.empty(), null, null, null, -1, null);
+          registrationState.setException(Optional.of(e));
+          return registrationState;
+        }
+      }
+
+      protected void onPostExecute(@Nullable RegistrationState state) {//AA+
+        if (state.state == RegistrationState.State.EXCEPTION) {
+          if (state.getException().isPresent() && state.getException().get() instanceof CaptchaRequiredException) {
+            requestCaptcha(true);
+          } else {
+            Toast.makeText(TBDRegistrationActivity.this, R.string.RegistrationActivity_unable_to_connect_to_service, Toast.LENGTH_LONG).show();
+            createButton.setIndeterminateProgressMode(false);
+            createButton.setProgress(0);
+            return;
+          }
+        }//
+
+        registrationState = new RegistrationState(RegistrationState.State.VERIFYING, state);//AA+
+
+        displayVerificationView(email/*e164number*/, 64);
+      }
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+  }
+
+  private void requestCaptcha(boolean isSms) {
+    startActivityForResult(CaptchaActivity.getIntent(this, isSms), CAPTCHA);
+  }
+
+  private void handleVerificationCodeReceived(@Nullable String code) {
+    List<Integer> parsedCode = convertVerificationCodeToDigits(code);
+
+    for (int i = 0; i < parsedCode.size(); i++) {
+      int index = i;
+      verificationCodeView.postDelayed(() -> verificationCodeView.append(parsedCode.get(index)), i * 200);
+    }
+  }
+
+  private List<Integer> convertVerificationCodeToDigits(@Nullable String code) {
+    if (code == null || code.length() != 6 || registrationState.state != RegistrationState.State.VERIFYING) {
+      return Collections.emptyList();
+    }
+
+    List<Integer> result = new LinkedList<>();
+
+    try {
+      for (int i = 0; i < code.length(); i++) {
+        result.add(Integer.parseInt(Character.toString(code.charAt(i))));
+      }
+    } catch (NumberFormatException e) {
+      Log.w(TAG, "Failed to convert code into digits.",e );
+      return Collections.emptyList();
+    }
+
+    return result;
+  }
+
+  @SuppressLint("StaticFieldLeak")
+  @Override
+  public void onCodeComplete(@NonNull String code) {
+    this.registrationState = new RegistrationState(RegistrationState.State.CHECKING, this.registrationState);
+    callMeCountDownView.setVisibility(View.INVISIBLE);
+    keyboard.displayProgress();
+
+    new AsyncTask<Void, Void, Pair<Integer, Long>>() {
+      @Override
+      protected Pair<Integer, Long> doInBackground(Void... voids) {
+        try {
+          verifyAccount(code, null);
+          return new Pair<>(1, -1L);
+        } catch (LockedException e) {
+          Log.w(TAG, e);
+          return new Pair<>(2, e.getTimeRemaining());
+        } catch (IOException e) {
+          Log.w(TAG, e);
+          return new Pair<>(3, -1L);
+        }
+      }
+
+      @Override
+      protected void onPostExecute(Pair<Integer, Long> result) {
+        if (result.first == 1) {
+          keyboard.displaySuccess().addListener(new AssertedSuccessListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+              handleSuccessfulRegistration();
+            }
+          });
+        } else if (result.first == 2) {
+          keyboard.displayLocked().addListener(new AssertedSuccessListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean r) {
+              registrationState = new RegistrationState(RegistrationState.State.PIN, registrationState);
+              displayPinView(code, result.second);
+            }
+          });
+        } else {
+          keyboard.displayFailure().addListener(new AssertedSuccessListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+              registrationState = new RegistrationState(RegistrationState.State.VERIFYING, registrationState);
+              callMeCountDownView.setVisibility(View.VISIBLE);
+              verificationCodeView.clear();
+              keyboard.displayKeyboard();
+            }
+          });
+        }
+      }
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+  }
+
+  private Optional<String> getFcmToken() {
+    final boolean gcmSupported = PlayServicesUtil.getPlayServicesStatus(this) == PlayServicesStatus.SUCCESS;
+    if (gcmSupported) {
+      return FcmUtil.getToken();
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  private void verifyAccount(@NonNull String code, @Nullable String pin) throws IOException {
+    int     registrationId              = KeyHelper.generateRegistrationId(false);
+    boolean universalUnidentifiedAccess = TextSecurePreferences.isUniversalUnidentifiedAccess(TBDRegistrationActivity.this);
+
+    ProfileKey profileKey                  = findExistingProfileKey(this, registrationState.username);
+    if (profileKey == null) {
+      profileKey = ProfileKeyUtil.createNew();
+      Log.i(TAG, "No profile key found, created a new one");
+    }
+    byte[] unidentifiedAccessKey = UnidentifiedAccess.deriveAccessKeyFrom(profileKey);
+
+    SignalStore.account().setRegistrationId(registrationId);
+
+    //AA+ return
+    JsonEntityVerifiedAccount verifiedAccount = accountManager.verifyAccountWithCodeTBD(code, null, registrationId, !registrationState.gcmToken.isPresent(), pin, "", unidentifiedAccessKey, universalUnidentifiedAccess, registrationState.pendingCookie, registrationState.username, registrationState.e164number, profileKey.serialize());
+
+    registrationState.verifiedCookie  = verifiedAccount.getCookie();
+    registrationState.accountUserid   = verifiedAccount.getUid();
+    registrationState.ufsrvUid        = verifiedAccount.getUfsrvuid();
+    registrationState.accessToken     = verifiedAccount.getAccessToken();
+    registrationState.profileKey      = verifiedAccount.getProfileKey();
+    registrationState.e164number      = verifiedAccount.getE164Number();
+    registrationState.username        = verifiedAccount.getUsername();
+    registrationState.uuid            = UuidUtil.parse(verifiedAccount.getUuid()).orElse(null);
+
+    if (TextUtils.isEmpty(registrationState.verifiedCookie)) throw new IOException();
+    TextSecurePreferences.setUfsrvCookie(TBDRegistrationActivity.this, registrationState.verifiedCookie);
+    TextSecurePreferences.setUfsrvUsername(TBDRegistrationActivity.this, registrationState.username);
+    SignalStore.account().setE164(registrationState.e164number);
+    SignalStore.account().setServicePassword(registrationState.password);
+    TextSecurePreferences.setUfsrvUfAccountCreated(TBDRegistrationActivity.this, true);
+    if (registrationState.accountUserid > 0)  TextSecurePreferences.setUserId(TBDRegistrationActivity.this, registrationState.accountUserid);
+    if (!TextUtils.isEmpty(registrationState.ufsrvUid)) TextSecurePreferences.setUfsrvUserId(TBDRegistrationActivity.this, registrationState.ufsrvUid);
+    if (!TextUtils.isEmpty(registrationState.accessToken)) TextSecurePreferences.setAccessToken(TBDRegistrationActivity.this, registrationState.accessToken);
+    else TextSecurePreferences.setAccessToken(TBDRegistrationActivity.this, null);
+
+    Log.d(TAG, String.format(">>> onCodeComplete (uid:'%d', ufsrvuid:'%s', uuid:'%s', profile_key:'%s', e164number:'%s', accessToken:'%s', profile_key:'%s'): RECEIVED SIGNON COOKIE: '%s'", registrationState.accountUserid, registrationState.ufsrvUid, registrationState.uuid.toString(), registrationState.profileKey, registrationState.e164number, registrationState.accessToken, registrationState.profileKey, registrationState.verifiedCookie));
+//
+    //AA+ reset account manager with actual crentials
+    //accountManager = ApplicationDependencies.getSignalServiceAccountManager(true);//done below
+
+    // old prekey TBD
+    /*IdentityKeyPair identityKey     = SignalStore.account().getAciIdentityKey();
+    List<PreKeyRecord> records      = PreKeyUtil.generatePreKeys(RegistrationActivity.this);
+    SignedPreKeyRecord signedPreKey = PreKeyUtil.generateSignedPreKey(RegistrationActivity.this, identityKey, true);
+
+    accountManager.setPreKeys(identityKey.getPublicKey(), signedPreKey, records);*/
+    //
+
+    //new prekey
+    ACI aci    = ACI.parseOrThrow(verifiedAccount.getUuid());
+    PNI pni    = PNI.parseOrThrow(verifiedAccount.getUuid());//AA+ set to same, as uf doesn't use PNI //response.getPnI()
+    boolean hasPin = false;//response.isStorageCapable();
+
+    SignalStore.account().setAci(aci);
+    SignalStore.account().setPni(pni);
+
+    ApplicationDependencies.getProtocolStore().aci().sessions().archiveAllSessions();
+    ApplicationDependencies.getProtocolStore().pni().sessions().archiveAllSessions();
+    SenderKeyUtil.clearAllState();
+
+//    SignalServiceAccountManager accountManager = AccountManagerFactory.createAuthenticated(context, aci, pni, registrationData.getE164(), SignalServiceAddress.DEFAULT_DEVICE_ID, registrationData.getPassword());
+    SignalServiceAccountManager       accountManager   = ApplicationDependencies.getSignalServiceAccountManager(true);//AA+ reset account manager with actual crentials
+    SignalServiceAccountDataStoreImpl aciProtocolStore = ApplicationDependencies.getProtocolStore().aci();
+    SignalServiceAccountDataStoreImpl pniProtocolStore = ApplicationDependencies.getProtocolStore().pni();
+
+    RegistrationRepository.generateAndRegisterPreKeys(ServiceIdType.ACI, accountManager, aciProtocolStore, SignalStore.account().aciPreKeys());
+    RegistrationRepository.generateAndRegisterPreKeys(ServiceIdType.PNI, accountManager, pniProtocolStore, SignalStore.account().pniPreKeys());
+    //
+
+    if (registrationState.gcmToken.isPresent()) {
+      accountManager.setGcmId(registrationState.gcmToken);
+    }
+
+    SignalStore.account().setFcmToken(registrationState.gcmToken.orElse(null));
+    SignalStore.account().setFcmEnabled(registrationState.gcmToken.isPresent());
+//    TextSecurePreferences.setWebsocketRegistered(RegistrationActivity.this, true);
+
+    //AA+ todo same call might be needed for PNI using pniProtocolStore.getIdentityKeyPair().getPublicKey() See RegistrationRepository.saveOwnIdentityKey()
+    ApplicationDependencies.getProtocolStore().aci().identities()
+                           .saveIdentityWithoutSideEffects(Recipient.external(TBDRegistrationActivity.this, registrationState.ufsrvUid).getId(),//todo: replace with Recipient.self().getId(),
+                                                           aciProtocolStore.getIdentityKeyPair().getPublicKey(),
+                                                           IdentityDatabase.VerifiedStatus.VERIFIED,
+                                                           true,
+                                                           System.currentTimeMillis(),
+                                                           true);
+
+    TextSecurePreferences.setVerifying(TBDRegistrationActivity.this, false);
+    SignalStore.account().setRegistered(true);
+    TextSecurePreferences.setPromptedPushRegistration(TBDRegistrationActivity.this, true);
+    TextSecurePreferences.setUnauthorizedReceived(TBDRegistrationActivity.this, false);
+
+    if (!TextUtils.isEmpty(registrationState.profileKey)) try {
+      profileKey = new ProfileKey(Base64.decode(registrationState.profileKey));
+    } catch (InvalidInputException x) {
+      Log.d(TAG, x);
+    }
+
+    ApplicationDependencies.getRecipientCache().clearSelf();
+    SignalDatabase.recipients().setProfileKey(Recipient.self().getId(), profileKey);
+    SignalDatabase.recipients().setProfileSharing(Recipient.self().getId(), true);
+    SignalDatabase.recipients().setRegistered(Recipient.self().getId(), RecipientDatabase.RegisteredState.REGISTERED);
+
+    ProfileUtil.uploadProfileVersion();//upload profile commitment and version at this stage
+    SignalStore.registrationValues().markHasUploadedProfile(); //AA also do this (borrowed from uploadProfile())
+
+//    ApplicationDependencies.getJobManager().add(new ProfileUploadJob());//upload profile commitment and version at this stage
+
+    SignalStore.registrationValues().setRegistrationComplete();
+  }
+
+  private void handleSuccessfulRegistration() {
+    ApplicationDependencies.getJobManager().add(new DirectoryRefreshJob(false));
+    ApplicationDependencies.getJobManager().add(new RotateCertificateJob());
+
+    DirectoryRefreshListener.schedule(TBDRegistrationActivity.this);
+    RotateSignedPreKeyListener.schedule(TBDRegistrationActivity.this);
+
+    Intent nextIntent = getIntent().getParcelableExtra("next_intent");
+
+    if (nextIntent == null) {
+      nextIntent = MainActivity.clearTop(this);
+    }
+
+    startActivity(nextIntent);
+    finish();
+  }
+
+  @SuppressLint("StaticFieldLeak")
+  private void handleVerifyWithPinClicked(@NonNull String code, @Nullable String pin) {
+    if (TextUtils.isEmpty(pin) || TextUtils.isEmpty(pin.replace(" ", ""))) {
+      Toast.makeText(this, R.string.RegistrationActivity_you_must_enter_your_registration_lock_PIN, Toast.LENGTH_LONG).show();
+      return;
+    }
+
+    pinButton.setIndeterminateProgressMode(true);
+    pinButton.setProgress(50);
+
+    new AsyncTask<Void, Void, Integer>() {
+      @Override
+      protected Integer doInBackground(Void... voids) {
+        try {
+          verifyAccount(code, pin);
+          return 1;
+        } catch (LockedException e) {
+          Log.w(TAG, e);
+          return 2;
+        } catch (RateLimitException e) {
+          Log.w(TAG, e);
+          return 3;
+        } catch (IOException e) {
+          Log.w(TAG, e);
+          return 4;
+        }
+      }
+
+      @Override
+      protected void onPostExecute(Integer result) {
+        pinButton.setIndeterminateProgressMode(false);
+        pinButton.setProgress(0);
+
+        if (result == 1) {
+          TextSecurePreferences.setV1RegistrationLockPin(TBDRegistrationActivity.this, pin);
+          TextSecurePreferences.setV1RegistrationLockEnabled(TBDRegistrationActivity.this, true);
+          TextSecurePreferences.setRegistrationLockLastReminderTime(TBDRegistrationActivity.this, System.currentTimeMillis());
+          TextSecurePreferences.setRegistrationLockNextReminderInterval(TBDRegistrationActivity.this, RegistrationLockReminders.INITIAL_INTERVAL);
+          handleSuccessfulRegistration();
+        } else if (result == 2) {
+          TBDRegistrationActivity.this.pin.setText("");
+          Toast.makeText(TBDRegistrationActivity.this, R.string.RegistrationActivity_incorrect_registration_lock_pin, Toast.LENGTH_LONG).show();
+        } else if (result == 3) {
+          new AlertDialog.Builder(TBDRegistrationActivity.this)
+                  .setTitle(R.string.RegistrationActivity_too_many_attempts)
+                  .setMessage(R.string.RegistrationActivity_you_have_made_too_many_incorrect_registration_lock_pin_attempts_please_try_again_in_a_day)
+                  .setPositiveButton(android.R.string.ok, null)
+                  .show();
+        } else if (result == 4) {
+          Toast.makeText(TBDRegistrationActivity.this, R.string.RegistrationActivity_error_connecting_to_service, Toast.LENGTH_LONG).show();
+        }
+      }
+    }.execute();
+  }
+
+  private void handleForgottenPin(long timeRemaining) {
+    new AlertDialog.Builder(TBDRegistrationActivity.this)
+            .setTitle(R.string.RegistrationActivity_oh_no)
+            .setMessage(getString(R.string.RegistrationActivity_registration_of_this_phone_number_will_be_possible_without_your_registration_lock_pin_after_seven_days_have_passed, (TimeUnit.MILLISECONDS.toDays(timeRemaining) + 1)))
+            .setPositiveButton(android.R.string.ok, null)
+            .show();
+  }
+
+  @SuppressLint("StaticFieldLeak")
+  private void handlePhoneCallRequest() {
+    final String e164number = getConfiguredE164Number();
+
+    if (registrationState.state == RegistrationState.State.VERIFYING) {
+//      callMeCountDownView.startCountDown(300); //AA-
+//
+//      new AsyncTask<Void, Void, Void>() {
+//        @Override
+//        protected Void doInBackground(Void... voids) {
+//          try {
+//      Optional<String> pushChallenge = PushChallengeRequest.getPushChallengeBlocking(accountManager, getFcmToken(), e164number, PUSH_REQUEST_TIMEOUT_MS);
+
+//      accountManager.requestVoiceVerificationCode(registrationState.pendingCookie, Locale.getDefault(), registrationState.captchaToken, pushChallenge); //AA+
+//          } catch (CaptchaRequiredException e) {
+//            requestCaptcha(false);
+//          } catch (IOException e) {
+//            Log.w(TAG, e);
+//          }
+//
+//          return null;
+//        }
+//      }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      displayVerificationView("", 64);//AA+
+    }
+  }
+
+  private void displayRestoreView(@NonNull BackupUtil.BackupInfo backup) {
+    title.animate().translationX(title.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        title.setText(R.string.RegistrationActivity_restore_from_backup);
+        title.clearAnimation();
+        title.setTranslationX(-1 * title.getWidth());
+        title.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    subtitle.animate().translationX(subtitle.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        subtitle.setText(R.string.RegistrationActivity_restore_your_messages_and_media_from_a_local_backup);
+        subtitle.clearAnimation();
+        subtitle.setTranslationX(-1 * subtitle.getWidth());
+        subtitle.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    registrationContainer.animate().translationX(registrationContainer.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        registrationContainer.clearAnimation();
+        registrationContainer.setVisibility(View.INVISIBLE);
+        registrationContainer.setTranslationX(0);
+
+        restoreContainer.setTranslationX(-1 * registrationContainer.getWidth());
+        restoreContainer.setVisibility(View.VISIBLE);
+        restoreButton.setProgress(0);
+        restoreButton.setIndeterminateProgressMode(false);
+        restoreButton.setOnClickListener(v -> handleRestore(backup));
+        restoreBackupSize.setText(getString(R.string.RegistrationActivity_backup_size_s, Util.getPrettyFileSize(backup.getSize())));
+        restoreBackupTime.setText(getString(R.string.RegistrationActivity_backup_timestamp_s, DateUtils.getExtendedRelativeTimeSpanString(TBDRegistrationActivity.this, Locale.US, backup.getTimestamp())));
+        restoreBackupProgress.setText("");
+        restoreContainer.animate().translationX(0).setDuration(SCENE_TRANSITION_DURATION).setListener(null).setInterpolator(new OvershootInterpolator()).start();
+      }
+    }).start();
+
+  }
+
+  private void displayInitialView(boolean forwards) {
+    verificationCodeView.clear();//AA+
+    int startDirectionMultiplier = forwards ? -1 : 1;
+    int endDirectionMultiplier   = forwards ? 1 : -1;
+
+    title.animate().translationX(startDirectionMultiplier * title.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        title.setText(R.string.registration_activity__verify_your_number);
+        title.clearAnimation();
+        title.setTranslationX(endDirectionMultiplier * title.getWidth());
+        title.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    subtitle.animate().translationX(startDirectionMultiplier * subtitle.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        subtitle.setText(R.string.registration_activity__please_enter_your_mobile_number_to_receive_a_verification_code_carrier_rates_may_apply);
+        subtitle.clearAnimation();
+        subtitle.setTranslationX(endDirectionMultiplier * subtitle.getWidth());
+        subtitle.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    View container;
+
+    if (verificationContainer.getVisibility() == View.VISIBLE) container = verificationContainer;
+    else                                                       container = restoreContainer;
+
+    container.animate().translationX(startDirectionMultiplier * container.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        container.clearAnimation();
+        container.setVisibility(View.INVISIBLE);
+        container.setTranslationX(0);
+
+        registrationContainer.setTranslationX(endDirectionMultiplier * registrationContainer.getWidth());
+        registrationContainer.setVisibility(View.VISIBLE);
+        createButton.setProgress(0);
+        createButton.setIndeterminateProgressMode(false);
+        registrationContainer.animate().translationX(0).setDuration(SCENE_TRANSITION_DURATION).setListener(null).setInterpolator(new OvershootInterpolator()).start();
+      }
+    }).start();
+  }
+
+  private void displayVerificationView(@NonNull String e164number, long callCountdown) {
+    if (true || runnableRegoVerificationJob != null) {//AA+ delete check
+      runnableRegoVerificationJob = setupVerificationStatusChecker(handler);
+      handler.post(runnableRegoVerificationJob);
+    }
+
+    ServiceUtil.getInputMethodManager(this)
+            .hideSoftInputFromWindow(countryCode.getWindowToken(), 0);
+
+    ServiceUtil.getInputMethodManager(this)
+            .hideSoftInputFromWindow(number.getWindowToken(), 0);
+
+    title.animate().translationX(-1 * title.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+//        title.setText(getString(R.string.RegistrationActivity_enter_the_code_we_sent_to_s, formatNumber(e164number)));
+        title.setText(R.string.RegistrationActivity_your_email_is_being_verified);//AA+
+        title.clearAnimation();
+        title.setTranslationX(title.getWidth());
+        title.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+//    subtitle.setText("");
+    subtitle.setText(getString(R.string.RegistrationActivity_check_your_email_for_verification_link, registrationState.username));//AA+
+    keyboard.setVisibility(View.INVISIBLE);//AA+
+
+    registrationContainer.animate().translationX(-1 * registrationContainer.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        registrationContainer.clearAnimation();
+        registrationContainer.setVisibility(View.INVISIBLE);
+        registrationContainer.setTranslationX(0);
+
+        verificationContainer.setTranslationX(verificationContainer.getWidth());
+        verificationContainer.setVisibility(View.VISIBLE);
+        verificationContainer.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    this.callMeCountDownView.startCountDown(callCountdown);
+
+    this.wrongNumberButton.setOnClickListener(v -> onWrongNumberClicked());
+    //AA+
+//    if (false/*!e164number.endsWith("45678") &&
+//            !e164number.endsWith("00000") &&
+//            !e164number.endsWith("61414436433")*/)//TODO: sms registration verification disabled for beta testing
+//    {
+//      this.callMeCountDownView.startCountDown(callCountdown);
+//      this.wrongNumberButton.setOnClickListener(v -> onWrongNumberClicked());
+//    }
+//    else handleVerificationCodeReceived ("456789");//
+  }
+
+  private void displayPinView(String code, long lockedUntil) {
+    title.animate().translationX(-1 * title.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        title.setText(R.string.RegistrationActivity_registration_lock_pin);
+        title.clearAnimation();
+        title.setTranslationX(title.getWidth());
+        title.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    subtitle.animate().translationX(-1 * subtitle.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        subtitle.setText(R.string.RegistrationActivity_this_phone_number_has_registration_lock_enabled_please_enter_the_registration_lock_pin);
+        subtitle.clearAnimation();
+        subtitle.setTranslationX(subtitle.getWidth());
+        subtitle.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    verificationContainer.animate().translationX(-1 * verificationContainer.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
+      @Override
+      public void onAnimationEnd(Animator animation) {
+        verificationContainer.clearAnimation();
+        verificationContainer.setVisibility(View.INVISIBLE);
+        verificationContainer.setTranslationX(0);
+
+        pinContainer.setTranslationX(pinContainer.getWidth());
+        pinContainer.setVisibility(View.VISIBLE);
+        pinContainer.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
+      }
+    }).start();
+
+    pinButton.setOnClickListener(v -> handleVerifyWithPinClicked(code, pin.getText().toString()));
+    pinForgotButton.setOnClickListener(v -> handleForgottenPin(lockedUntil));
+    pin.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {}
+      @Override
+      public void afterTextChanged(Editable s) {
+        if       (s != null && code.equals(s.toString()))                   pinClarificationContainer.setVisibility(View.VISIBLE);
+        else if (pinClarificationContainer.getVisibility() == View.VISIBLE) pinClarificationContainer.setVisibility(View.GONE);
+      }
+    });
+  }
+
+  private void handleCancel() {
+    TextSecurePreferences.setPromptedPushRegistration(TBDRegistrationActivity.this, true);
+    Intent nextIntent = getIntent().getParcelableExtra("next_intent");
+
+    if (nextIntent == null) {
+      nextIntent = MainActivity.clearTop(this);
+    }
+
+    startActivity(nextIntent);
+    finish();
+  }
+
+  private void handlePromptForNoPlayServices(@NonNull String e164number) {
+    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+    dialog.setTitle(R.string.RegistrationActivity_missing_google_play_services);
+    dialog.setMessage(R.string.RegistrationActivity_this_device_is_missing_google_play_services);
+    dialog.setPositiveButton(R.string.RegistrationActivity_i_understand, (dialog1, which) -> handleRequestVerification(e164number, false, null));
+    dialog.setNegativeButton(android.R.string.cancel, null);
+    dialog.show();
+  }
+
+  private void initializeChallengeListener() {
+//AA- this has timeout and will fire off broadcast
+//    smsRetrieverReceiver = new SmsRetrieverReceiver();
+//    IntentFilter filter = new IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION);
+//    registerReceiver(smsRetrieverReceiver, filter);
+
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(RegistrationStatusVerifierJob.REGO_STATUS_VERIFIED_ACTION);
+
+    smsRetrieverReceiver = new SmsRetrieverReceiver();
+    registerReceiver(smsRetrieverReceiver, filter);
+  }
+
+  private void shutdownChallengeListener() {
+    if (smsRetrieverReceiver != null) {
+      unregisterReceiver(smsRetrieverReceiver);
+      smsRetrieverReceiver = null;
+    }
+  }
+
+  private void markAsVerifying(boolean verifying) {
+    TextSecurePreferences.setVerifying(this, verifying);
+
+    if (verifying) {
+      SignalStore.account().setRegistered(false);
+    }
+  }
+
+  private static @Nullable
+  ProfileKey findExistingProfileKey(@NonNull Context context, @NonNull String e164number) {
+    RecipientDatabase     recipientDatabase = SignalDatabase.recipients();
+    Optional<RecipientId> recipient         = recipientDatabase.getByE164(e164number);
+
+    if (recipient.isPresent()) {
+      return ProfileKeyUtil.profileKeyOrNull(Recipient.resolved(recipient.get()).getProfileKey());
+    }
+
+    return null;
+  }
+
+  private String formatNumber(@NonNull String e164Number) {
+    try {
+      Phonenumber.PhoneNumber number = PhoneNumberUtil.getInstance().parse(e164Number, null);
+      return PhoneNumberUtil.getInstance().format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+    } catch (NumberParseException e) {
+      return e164Number;
+    }
+  }
+
+  private void onWrongNumberClicked() {
+    displayInitialView(false);
+    registrationState = new RegistrationState(RegistrationState.State.INITIAL, null, null, Optional.empty(), Optional.empty(), null, null, null, -1, null);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(FullBackupBase.BackupEvent event) {
+    if (event.getCount() == 0) restoreBackupProgress.setText(R.string.RegistrationActivity_checking);
+    else                       restoreBackupProgress.setText(getString(R.string.RegistrationActivity_d_messages_so_far, event.getCount()));
+  }
+
+  private class SmsRetrieverReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      Log.i(TAG, "SmsRetrieverReceiver received a broadcast...");
+
+      if (SmsRetriever.SMS_RETRIEVED_ACTION.equals(intent.getAction())) {
+        Bundle extras = intent.getExtras();
+        Status status = (Status) extras.get(SmsRetriever.EXTRA_STATUS);
+
+        switch (status.getStatusCode()) {
+          case CommonStatusCodes.SUCCESS:
+            Optional<String> code = VerificationCodeParser.parse((String) extras.get(SmsRetriever.EXTRA_SMS_MESSAGE));
+            if (code.isPresent()) {
+              Log.i(TAG, "Received verification code.");
+              handleVerificationCodeReceived(code.get());
+            } else {
+              Log.w(TAG, "Could not parse verification code.");
+            }
+            break;
+          case CommonStatusCodes.TIMEOUT:
+            Log.w(TAG, "Hit a timeout waiting for the SMS to arrive.");
+            break;
+        }
+      } else if (RegistrationStatusVerifierJob.REGO_STATUS_VERIFIED_ACTION.equals(intent.getAction())) {//AA+
+        Log.w(TAG, "SmsRetrieverReceiver received ACCOUNT VERIFIED");
+        String verificationCode = intent.getExtras().getString(RegistrationStatusVerifierJob.REGO_STATUS_VERIFICATION_CODE_EXTRA);
+
+        cancelRegoVerificationCheck();
+        handleVerificationCodeReceived(verificationCode);
+      }
+      else {
+        Log.w(TAG, "SmsRetrieverReceiver received the wrong action?");
+      }
+    }
+  }
+
+  private class CountryCodeChangedListener implements TextWatcher {
+    @Override
+    public void afterTextChanged(Editable s) {
+      if (TextUtils.isEmpty(s) || !TextUtils.isDigitsOnly(s)) {
+        setCountryDisplay(getString(R.string.RegistrationActivity_select_your_country));
+        countryFormatter = null;
+        return;
+      }
+
+      int countryCode   = Integer.parseInt(s.toString());
+      String regionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(countryCode);
+
+      setCountryFormatter(countryCode);
+      setCountryDisplay(PhoneNumberFormatter.getRegionDisplayName(regionCode).orElse("__"));
+
+      if (!TextUtils.isEmpty(regionCode) && !regionCode.equals("ZZ")) {
+        //number.requestFocus(); //AA- relinquish to email field
+      }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+  }
+
+  private class NumberChangedListener implements TextWatcher {
+
+    @Override
+    public void afterTextChanged(Editable s) {
+      if (countryFormatter == null)
+        return;
+
+      if (TextUtils.isEmpty(s))
+        return;
+
+      countryFormatter.clear();
+
+      String number          = s.toString().replaceAll("[^\\d.]", "");
+      String formattedNumber = null;
+
+      for (int i=0;i<number.length();i++) {
+        formattedNumber = countryFormatter.inputDigit(number.charAt(i));
+      }
+
+      if (formattedNumber != null && !s.toString().equals(formattedNumber)) {
+        s.replace(0, s.length(), formattedNumber);
+      }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+  }
+
+  private void handleCountryCodeConfirmation (@NonNull String countryCode) {
+    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+    dialog.setTitle(R.string.RegistrationActivity_confirm_country_code);
+    dialog.setMessage(String.format(getString(R.string.RegistrationActivity_confirm_country_code_selection), countryCode));
+    dialog.setPositiveButton(R.string.RegistrationActivity_confirm_country_code_proceed_yes, (a,b) -> handlePlayServicesCheck());
+    dialog.setNegativeButton(android.R.string.cancel, null );
+    dialog.show();
+  }
+
+  //AA+
+  public void setupNicknameAvailabilityServiceReceiver() {
+    nicknameAvailabilityReceiver = new NicknameAvailabilityReceiver(new Handler(Looper.getMainLooper()));
+    // specify what happens when data is received from the service
+    nicknameAvailabilityReceiver.setReceiver(new NicknameAvailabilityReceiver.Receiver() {
+      @Override
+      public void onReceiveResult(int resultCode, Bundle resultData) {
+        if (resultCode == 0)
+        {
+          //boolean isNicknameAvailable;
+          isNicknameAvailable=resultData.getBoolean(IntentServiceCheckNicknameAvailability.RESULT_NICKNAME_EXTRA, false);
+          if (isNicknameAvailable)  nicknameLayout.setError("Nickname available...");
+          else nicknameLayout.setError("Nickname not available...");
+        }
+        else
+        {
+          nicknameLayout.setError("Availability can't be confimed now");
+        }
+//        if (resultCode == RESULT_OK) {
+//          String resultValue = resultData.getString("resultValue");
+//          Toast.makeText(MainActivity.this, resultValue, Toast.LENGTH_SHORT).show();
+//        }
+      }
+    });
+  }
+
+  //AA+
+  Runnable setupVerificationStatusChecker (Handler handler)
+  {
+    Runnable runnableCode = new Runnable() {
+      @Override
+      public void run () {
+        ApplicationDependencies.getJobManager().add(new RegistrationStatusVerifierJob());
+
+        handler.postDelayed(this, TimeUnit.SECONDS.toMillis(15));
+      }
+    };
+
+    return runnableCode;
+  }
+
+  void cancelRegoVerificationCheck ()
+  {
+    if (runnableRegoVerificationJob != null) handler.removeCallbacks(runnableRegoVerificationJob);
+    runnableRegoVerificationJob = null;
+  }
+
+  @Override
+  public void onRemaining(@NonNull CheckingAccountVerificationStatusView view, long remaining)
+  {
+    cancelRegoVerificationCheck ();
+  }
+//
+
+  private static class RegistrationState {
+    private enum State {
+      INITIAL, VERIFYING, CHECKING, PIN, EXCEPTION //AA+ exception
+    }
+
+    private final State   state;
+    private       String  e164number;
+    private final String  password;
+    private final Optional<String> gcmToken;
+    private final Optional<String> captchaToken;
+
+    //AA+
+    private       Optional<IOException> exception;
+    private final String  pendingCookie;
+    private       String  username;
+    private       String  verifiedCookie;
+    private       long    accountUserid;
+    private       String  ufsrvUid;
+    private       String  accessToken;
+    private       String  profileKey;
+    private       UUID    uuid;
+    //
+
+    RegistrationState(State state, String e164number, String password, Optional<String> gcmToken, Optional<String> captchaToken, String pendingCookie, String verifiedCookie, String username, long accountUserid, String ufsrvUid) {
+      this.state      = state;
+      this.e164number = e164number;
+      this.password   = password;
+      this.gcmToken   = gcmToken;
+      this.captchaToken = captchaToken;
+
+      //AA+
+      this.pendingCookie   = pendingCookie;
+      this.verifiedCookie  = verifiedCookie;
+      this.username        = username;
+      this.accountUserid   = accountUserid;
+      this.ufsrvUid        = ufsrvUid;
+      this.exception       = Optional.empty();
+    }
+
+    RegistrationState(State state, RegistrationState previous) {
+      this.state      = state;
+      this.e164number = previous.e164number;
+      this.password   = previous.password;
+      this.gcmToken   = previous.gcmToken;
+      this.captchaToken = previous.captchaToken;
+
+      //AA+
+      this.pendingCookie    = previous.pendingCookie;
+      this.verifiedCookie   = previous.verifiedCookie;
+      this.username         = previous.username;
+      this.accountUserid    = previous.accountUserid;
+      this.ufsrvUid         = previous.ufsrvUid;
+      this.accessToken      = previous.accessToken;
+      this.profileKey       = previous.profileKey;
+      this.exception        = previous.exception;
+    }
+
+    RegistrationState(Optional<String> captchaToken, RegistrationState previous) {
+      this.state        = previous.state;
+      this.e164number   = previous.e164number;
+      this.password     = previous.password;
+      this.gcmToken     = previous.gcmToken;
+      this.captchaToken = captchaToken;
+
+      //AA+
+      this.pendingCookie    = previous.pendingCookie;
+      this.verifiedCookie   = previous.verifiedCookie;
+      this.username         = previous.username;
+      this.accountUserid    = previous.accountUserid;
+      this.ufsrvUid         = previous.ufsrvUid;
+      this.accessToken      = previous.accessToken;
+      this.profileKey       = previous.profileKey;
+      this.exception        = previous.exception;
+    }
+
+    public void setException (Optional<IOException> exception) {
+      this.exception = exception;
+    }
+
+    public Optional<IOException> getException () {
+      return exception;
+    }
+  }
+
+  private enum BackupImportResult {
+    SUCCESS, FAILURE_VERSION_DOWNGRADE, FAILURE_UNKNOWN
+  }
+}

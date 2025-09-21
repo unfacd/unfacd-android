@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'org.signal.video'
+    buildToolsVersion BUILD_TOOL_VERSION
+    compileSdk COMPILE_SDK
+
+    defaultConfig {
+        minSdkVersion MINIMUM_SDK
+        targetSdkVersion TARGET_SDK
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JAVA_VERSION
+        targetCompatibility JAVA_VERSION
+    }
+}
+
+dependencies {
+    lintChecks project(':lintchecks')
+
+    api 'androidx.annotation:annotation:1.1.0'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+
+    implementation project(':core-util')
+
+    implementation 'org.mp4parser:isoparser:1.9.39'
+    implementation 'org.mp4parser:streaming:1.9.39'
+    implementation('org.mp4parser:muxer:1.9.39') {
+        exclude group: 'junit', module: 'junit'
+    }
+}

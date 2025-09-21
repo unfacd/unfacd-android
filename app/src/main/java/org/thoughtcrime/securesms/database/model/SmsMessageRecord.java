@@ -1,0 +1,123 @@
+/**
+ * Copyright (C) 2012 Moxie Marlinspike
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.thoughtcrime.securesms.database.model;
+
+import com.unfacd.android.R;
+import com.unfacd.android.utils.UfsrvUserUtils;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
+
+import android.text.SpannableString;
+
+import org.thoughtcrime.securesms.database.MmsSmsColumns;
+import org.thoughtcrime.securesms.database.SmsDatabase;
+import org.thoughtcrime.securesms.database.documents.IdentityKeyMismatch;
+import org.thoughtcrime.securesms.recipients.Recipient;
+import org.whispersystems.signalservice.internal.push.SignalServiceProtos;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * The message record model which represents standard SMS messages.
+ *
+ * @author Moxie Marlinspike
+ *
+ */
+public class SmsMessageRecord extends MessageRecord {
+
+  public SmsMessageRecord(long id,
+                          String body, Recipient recipient,
+                          Recipient individualRecipient,
+                          int recipientDeviceId,
+                          long dateSent, long dateReceived, long dateServer,
+                          int deliveryReceiptCount,
+                          long type, long threadId,
+                          int status, Set<IdentityKeyMismatch> mismatches,
+                          int subscriptionId, long expiresIn, long expireStarted, int readReceiptCount, boolean unidentified, @NonNull List<ReactionRecord> reactions, boolean remoteDelete, long notifiedTimestamp, long receiptTimestamp,
+                          SignalServiceProtos.UfsrvCommandWire ufsrvCommand, long ufsrvGid, long ufsrvEid, long ufsvrFid, int ufsrvStatus, int ufsrvMessageType, int ufsrvMessageArg)//AA+
+  {
+    super(id, body, recipient, individualRecipient, recipientDeviceId,
+          dateSent, dateReceived, dateServer, threadId, status, deliveryReceiptCount, type,
+          mismatches, new HashSet<>(), subscriptionId,
+          expiresIn, expireStarted, readReceiptCount, unidentified, reactions, remoteDelete, notifiedTimestamp, 0, receiptTimestamp,
+          ufsrvCommand, ufsrvGid, ufsrvEid, ufsvrFid, ufsrvStatus, ufsrvMessageType, ufsrvMessageArg);//AA+  ufsrvCommand
+  }
+
+  public long getType() {
+    return type;
+  }
+
+  @Override
+  @WorkerThread
+  public SpannableString getDisplayBody(@NonNull Context context) {
+    if (SmsDatabase.Types.isChatSessionRefresh(type)) {
+      return new SpannableString(context.getString(R.string.MessageRecord_chat_session_refreshed));
+    } else if (isCorruptedKeyExchange()) {
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_received_corrupted_key_exchange_message));
+    } else if (isInvalidVersionKeyExchange()) {
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_received_key_exchange_message_for_invalid_protocol_version));
+    } else if (MmsSmsColumns.Types.isLegacyType(type)) {
+      return new SpannableString(context.getString(R.string.MessageRecord_message_encrypted_with_a_legacy_protocol_version_that_is_no_longer_supported));
+    } else if (isBundleKeyExchange()) {
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_received_message_with_new_safety_number_tap_to_process));
+    } else if (isKeyExchange() && isOutgoing()) {
+      return new SpannableString("");
+    } else if (isKeyExchange() && !isOutgoing()) {
+      return new SpannableString(context.getString(R.string.ConversationItem_received_key_exchange_message_tap_to_process));
+    } else if (SmsDatabase.Types.isDuplicateMessageType(type)) {
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_duplicate_message));
+    } else if (SmsDatabase.Types.isNoRemoteSessionType(type)) {
+      return new SpannableString(context.getString(R.string.MessageDisplayHelper_message_encrypted_for_non_existing_session));
+    } else if (isEndSession() && isOutgoing()) {
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_secure_session_reset));
+    } else if (isEndSession()) {
+      Recipient recipientOriginator = UfsrvUserUtils.recipientFromUserCommandOriginator(getUfsrvCommand().getUserCommand(), false);
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_secure_session_reset_s, recipientOriginator.getDisplayName()));//AA+
+    } else if (SmsDatabase.Types.isUnsupportedMessageType(type)) {
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_this_message_could_not_be_processed_because_it_was_sent_from_a_newer_version));
+    } else if (isReportedMessageLog()) { //AA+
+      return describeReportedMessageLog(context);
+    } else if (SmsDatabase.Types.isInvalidMessageType(type)) {
+      return new SpannableString(context.getString(R.string.SmsMessageRecord_error_handling_incoming_message));
+    } else {
+      return super.getDisplayBody(context);
+    }
+  }
+
+  @Override
+  public boolean isMms() {
+    return false;
+  }
+
+  @Override
+  public boolean isMmsNotification() {
+    return false;
+  }
+
+  public @NonNull SmsMessageRecord withReactions(@NonNull List<ReactionRecord> reactions) {
+    return new SmsMessageRecord(getId(), getBody(), getRecipient(), getIndividualRecipient(), getRecipientDeviceId(), getDateSent(), getDateReceived(),
+                                getServerTimestamp(), getDeliveryReceiptCount(), getType(), getThreadId(), getDeliveryStatus(), getIdentityKeyMismatches(),
+                                getSubscriptionId(), getExpiresIn(), getExpireStarted(), getReadReceiptCount(), isUnidentified(), reactions, isRemoteDelete(),
+                                getNotifiedTimestamp(), getReceiptTimestamp(), null, 0, 0, 0, 0, 0,0);//AA+
+  }
+}

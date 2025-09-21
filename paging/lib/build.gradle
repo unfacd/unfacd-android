@@ -1,0 +1,27 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'org.signal.paging'
+    buildToolsVersion BUILD_TOOL_VERSION
+    compileSdk COMPILE_SDK
+
+    defaultConfig {
+        minSdkVersion MINIMUM_SDK
+        targetSdkVersion TARGET_SDK
+    }
+
+    compileOptions {
+        sourceCompatibility JAVA_VERSION
+        targetCompatibility JAVA_VERSION
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation libs.rxjava3.rxandroid
+    implementation libs.rxjava3.rxjava
+    implementation project(':core-util')
+
+    testImplementation 'junit:junit:4.12'
+}

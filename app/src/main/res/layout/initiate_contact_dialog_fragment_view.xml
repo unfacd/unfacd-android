@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <org.thoughtcrime.securesms.components.InputAwareLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.thoughtcrime.securesms.util.views.LearnMoreTextView
+                    android:id="@+id/intro_text"
+                    style="@style/Signal.Text.Preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="33dp"
+                    android:layout_marginBottom="16dp"
+                    android:padding="@dimen/dsl_settings_gutter"
+                    android:text="@string/InitiateContactDialog_unfacd_title_msg"
+                    android:textColor="@color/signal_text_secondary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintVertical_bias="1.0" />
+
+                <org.thoughtcrime.securesms.components.LabeledEditText
+                    android:id="@+id/handle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_weight="1"
+                    android:hint="@string/profile_create_activity__your_name"
+                    app:labeledEditText_background="@color/signal_background_primary"
+                    app:labeledEditText_label="@string/InitiateContactDialog_unfacd_handle"
+                    app:labeledEditText_textLayout="@layout/profile_name_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/intro_text"/>
+
+                <org.thoughtcrime.securesms.components.LabeledEditText
+                    android:id="@+id/msg"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginBottom="32dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/profile_create_activity__your_name"
+                    app:labeledEditText_background="@color/signal_background_primary"
+                    app:labeledEditText_label="@string/InitiateContactDialog_optional_msg"
+                    app:labeledEditText_textLayout="@layout/profile_name_text"
+                    app:layout_constraintBottom_toTopOf="@+id/description_text"
+                    app:layout_constraintEnd_toStartOf="@+id/emoji_toggle"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/handle"/>
+
+                <org.thoughtcrime.securesms.components.emoji.EmojiToggle
+                    android:id="@+id/emoji_toggle"
+                    android:layout_width="37dp"
+                    android:layout_height="37dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginTop="9dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/conversation_activity__emoji_toggle_description"
+                    app:layout_constraintBottom_toBottomOf="@+id/msg"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/msg"/>
+
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/avatar_background"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="4dp"
+                    android:src="@drawable/circle_tintable"
+                    android:tint="@color/core_grey_05"
+                    app:layout_constraintBottom_toBottomOf="@+id/description_text"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/description_text"/>
+
+                <ImageView
+                    android:id="@+id/avatar_placeholder"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="16dp"
+                    app:srcCompat="@drawable/ic_profile_outline_40"
+                    android:tint="@color/core_grey_75"
+                    android:transitionName="avatar"
+                    app:layout_constraintBottom_toBottomOf="@+id/avatar_background"
+                    app:layout_constraintEnd_toEndOf="@+id/avatar_background"
+                    app:layout_constraintStart_toStartOf="@+id/avatar_background"
+                    app:layout_constraintTop_toTopOf="@+id/avatar_background"/>
+
+                <ImageView
+                    android:id="@+id/avatar"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/avatar_background"
+                    app:layout_constraintEnd_toEndOf="@+id/avatar_background"
+                    app:layout_constraintStart_toStartOf="@+id/avatar_background"
+                    app:layout_constraintTop_toTopOf="@+id/avatar_background"/>
+
+                <ImageView
+                    android:id="@+id/camera_icon"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginLeft="35dp"
+                    android:layout_marginStart="35dp"
+                    android:layout_marginTop="35dp"
+                    android:cropToPadding="false"
+                    android:src="@drawable/ic_profile_camera"
+                    app:layout_constraintStart_toStartOf="@+id/avatar_background"
+                    app:layout_constraintTop_toTopOf="@+id/avatar_background"/>
+
+                <TextView
+                    android:id="@+id/description_text"
+                    style="@style/Signal.Text.Preview"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginStart="32dp"
+                    android:gravity="center"
+                    android:text="@string/InitiateContactDialog_avatar_attachment_text"
+
+                    android:textColor="@color/core_grey_60"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/avatar_background"
+                    app:layout_constraintTop_toBottomOf="@+id/msg"/>
+
+                <TextView
+                    android:id="@+id/debug_text"
+                    style="@style/Signal.Text.Preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center"
+                    android:text="@string/CreateProfileActivity_signal_profiles_are_end_to_end_encrypted"
+                    android:textColor="@color/core_grey_60"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/description_text"
+                    app:layout_constraintVertical_bias="1.0"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </ScrollView>
+
+        <com.dd.CircularProgressButton
+            android:id="@+id/finish_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="32dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"
+            android:layout_marginStart="32dp"
+            android:background="@color/core_ultramarine"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            app:cpb_colorIndicator="@color/white"
+            app:cpb_colorProgress="@color/core_ultramarine"
+            app:cpb_cornerRadius="4dp"
+            app:cpb_selectorIdle="@drawable/progress_button_state"
+            app:cpb_textIdle="@string/InitiateContactDialog_send"/>
+
+        <Button
+            android:id="@+id/skip_button"
+            style="@style/Button.Borderless.Registration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/InitiateContactDialog_cancel"
+            android:textColor="@color/core_grey_50"/>
+        <Button
+            android:id="@+id/later_button"
+            style="@style/Button.Borderless.Registration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/IntroContactNotificationBuilder_intro_contact__later"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:textColor="@color/core_grey_50"/>
+
+        <!--<org.thoughtcrime.securesms.components.emoji.MediaKeyboard
+            android:id="@+id/emoji_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />-->
+        <ViewStub
+            android:id="@+id/emoji_drawer_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/emoji_drawer"
+            android:layout="@layout/conversation_activity_emojidrawer_stub" />
+
+    </org.thoughtcrime.securesms.components.InputAwareLayout>
+
+    <View
+        android:id="@+id/reveal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/core_ultramarine"
+        android:visibility="invisible"
+        tools:visibility="gone"/>
+
+
+</FrameLayout>

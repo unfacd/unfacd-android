@@ -1,0 +1,47 @@
+apply plugin: 'com.android.library'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+version smartLocationVersion
+group 'io.nlopez.smartlocation'
+
+dependencies {
+    repositories {
+        mavenCentral()
+        maven { url "https://maven.google.com" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    }
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.android.support:support-annotations:26.1.0'
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+//    testImplementation "org.robolectric:robolectric-shadows:$robolectricVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+}
+
+android {
+    namespace 'io.nlopez.smartlocation'
+    compileSdk COMPILE_SDK
+
+    defaultConfig {
+        minSdkVersion MINIMUM_SDK
+        targetSdkVersion TARGET_SDK
+    }
+
+    compileOptions {
+        sourceCompatibility JAVA_VERSION
+        targetCompatibility JAVA_VERSION
+    }
+}
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+def getProperty(project, property) {
+    return project.hasProperty(property) ? project.property(property) : ""
+}

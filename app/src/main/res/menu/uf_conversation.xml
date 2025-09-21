@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/item_badge_unread"
+        app:actionLayout="@layout/menu_action_item_badge"
+        app:showAsAction="always"
+        android:title="Unread"
+        android:orderInCategory="200"/>
+
+    <!--<item android:id="@+id/menu_location"-->
+          <!--app:actionLayout="@layout/uf_location_menu"-->
+          <!--app:showAsAction="ifRoom"-->
+          <!--android:title="@string/uf_menu_conversation_location"-->
+          <!--android:orderInCategory="100"/>-->
+
+</menu>
